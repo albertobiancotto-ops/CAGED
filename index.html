@@ -4,6 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>CAGED & Scale Guitar Trainer</title>
+  
+  <!-- Integrazione Manifest PWA e tema -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#2563eb">
+
   <style>
     :root {
       --bg-color: #ffffff;
@@ -32,7 +37,7 @@
 
     h1 { font-size: 1.4rem; margin-bottom: 12px; text-align: center; color: #0f172a; }
 
-    /* Box Informativo / Didattico */
+    /* Box Informativo Dinamico */
     .info-box {
       background: #eff6ff;
       border: 1px solid #bfdbfe;
@@ -216,22 +221,7 @@
     .note-chord { background-color: var(--chord-color); color: #000; }
     .note-scale { background-color: var(--scale-color); color: #000; }
   </style>
-
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#2563eb">
-
 </head>
-
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./sw.js')
-        .then((reg) => console.log('Service Worker registrato con successo:', reg.scope))
-        .catch((err) => console.error('Registrazione Service Worker fallita:', err));
-    });
-  }
-</script>
-
 <body>
 
   <h1>CAGED & Scale Trainer</h1>
@@ -323,7 +313,6 @@
       "pentatonic_major": [0, 2, 4, 7, 9]
     };
 
-    // Corrispondenza Formen CAGED: Forma Maggiore -> Forma Relativo Minore
     const CAGED_RELATIVE_MAP = {
       "C": "A",
       "A": "G",
@@ -332,15 +321,16 @@
       "D": "C"
     };
 
+    // offset: spostamento del tasto di inizio box rispetto alla tonica sulla corda guida
     const CAGED_OFFSETS = {
-      "E": { string: 5, offset: 0 },
-      "A": { string: 4, offset: 0 },
-      "D": { string: 3, offset: 0 },
-      "C": { string: 4, offset: -3 },
-      "G": { string: 5, offset: -3 }
+      "E": { string: 5, offset: 0 },   // Box parte dalla Tonica
+      "A": { string: 4, offset: -1 },  // Box parte 1 tasto prima (per coprire il tasto II nella forma A)
+      "D": { string: 3, offset: -1 },  // Box parte 1 tasto prima
+      "C": { string: 4, offset: -3 },  // Box parte 3 tasti prima
+      "G": { string: 5, offset: -3 }   // Box parte 3 tasti prima
     };
 
-    let currentViewMode = "maj"; // 'maj', 'min', 'both'
+    let currentViewMode = "maj";
 
     const rootSelect = document.getElementById("root-select");
     CHROMATIC_SCALE.forEach(note => {
@@ -357,7 +347,6 @@
     const fretboardEl = document.getElementById("fretboard");
     const infoBoxEl = document.getElementById("info-box");
 
-    // Event listener selettore vista
     document.querySelectorAll(".view-btn").forEach(btn => {
       btn.addEventListener("click", (e) => {
         document.querySelectorAll(".view-btn").forEach(b => b.classList.remove("active"));
@@ -388,24 +377,19 @@
       const majCagedForm = cagedSelect.value;
       const tuning = TUNINGS[tuningSelect.value];
 
-      // Calcolo Tonica Minore Relativa (VI grado = 9 semitoni sopra / 3 sotto)
       const minRootIndex = (CHROMATIC_SCALE.indexOf(majRoot) + 9) % 12;
       const minRoot = CHROMATIC_SCALE[minRootIndex];
       const minCagedForm = CAGED_RELATIVE_MAP[majCagedForm];
 
-      // Aggiornamento Box Informativo
       infoBoxEl.innerHTML = `
         <strong>Tonalità:</strong> ${majRoot} Maggiore &bull; <strong>Relativo Minore:</strong> ${minRoot} Minore<br>
         <strong>Stesso Box:</strong> Forma <strong>${majCagedForm}</strong> (${majRoot} Maj) &harr; Forma <strong>${minCagedForm}</strong> (${minRoot} min)
       `;
 
-      // Note della scala (riferita alla tonica maggiore)
       const scaleNotes = SCALE_INTERVALS[scaleType].map(i => CHROMATIC_SCALE[(CHROMATIC_SCALE.indexOf(majRoot) + i) % 12]);
 
-      // Note Triade Maggiore: 0 (R), 4 (3M), 7 (5)
-      // Note Triade Minore: 9 (Rm), 0 (3m rispetto a Rm), 4 (5 rispetto a Rm)
       const majChordSemitones = [0, 4, 7];
-      const minChordSemitones = [9, 0, 4]; // semitoni rispetto alla tonica maggiore
+      const minChordSemitones = [9, 0, 4];
 
       const refStringOpenNote = tuning[CAGED_OFFSETS[majCagedForm].string];
       let rootFret = 0;
@@ -449,6 +433,7 @@
           line.className = "string-line";
           cell.appendChild(line);
 
+          // Estensione del box a 4 tasti (o corda a vuoto 0)
           const isWithinFourFrets = (currentFret >= baseFret && currentFret < baseFret + 4) || currentFret === 0;
 
           if (scaleNotes.includes(note) && isWithinFourFrets) {
@@ -462,7 +447,6 @@
             const isMajChord = majChordSemitones.includes(semitonesFromMaj);
             const isMinChord = minChordSemitones.includes(semitonesFromMaj);
 
-            // Logica di visualizzazione in base al selettore Modalità
             if (currentViewMode === "maj") {
               if (isMajRoot) {
                 dot.classList.add("note-root-maj");
@@ -512,6 +496,17 @@
     }
 
     render();
+  </script>
+
+  <!-- Registrazione del Service Worker per la PWA -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js')
+          .then((reg) => console.log('Service Worker registrato:', reg.scope))
+          .catch((err) => console.error('Errore Service Worker:', err));
+      });
+    }
   </script>
 </body>
 </html>
