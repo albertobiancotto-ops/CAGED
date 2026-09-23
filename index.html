@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CAGED & Scale Guitar Trainer</title>
+  <style>
+    :root {
+      --bg-color: #ffffff;
+      --card-bg: #f8fafc;
+      --border-color: #e2e8f0;
+      --text-color: #1e293b;
+      --accent-color: #2563eb;
+      --root-maj-color: #ef4444;   /* Rosso per la Tonica Maggiore */
+      --root-min-color: #8b5cf6;   /* Viola per la Tonica Minore */
+      --chord-color: #f59e0b;      /* Arancione per note dell'accordo */
+      --scale-color: #10b981;      /* Verde per altre note della scala */
+      --fret-color: #94a3b8;
+      --string-color: #64748b;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    h1 { font-size: 1.4rem; margin-bottom: 12px; text-align: center; color: #0f172a; }
+
+    /* Box Informativo / Didattico */
+    .info-box {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-left: 4px solid var(--accent-color);
+      padding: 10px 15px;
+      border-radius: 6px;
+      width: 100%;
+      max-width: 500px;
+      margin-bottom: 15px;
+      font-size: 0.88rem;
+      color: #1e40af;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    }
+
+    .info-box strong { color: #1e3a8a; }
+
+    .controls {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      padding: 15px;
+      border-radius: 10px;
+      width: 100%;
+      max-width: 500px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 15px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .control-group.full-width {
+      grid-column: span 2;
+    }
+
+    label { font-size: 0.8rem; margin-bottom: 4px; color: #475569; font-weight: bold; }
+    
+    select {
+      background: #ffffff;
+      color: #0f172a;
+      border: 1px solid #cbd5e1;
+      padding: 8px 10px;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      outline: none;
+    }
+
+    .view-mode-group {
+      display: flex;
+      gap: 8px;
+    }
+
+    .view-btn {
+      flex: 1;
+      padding: 8px 5px;
+      font-size: 0.8rem;
+      font-weight: bold;
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      color: #475569;
+      border-radius: 6px;
+      cursor: pointer;
+      text-align: center;
+    }
+
+    .view-btn.active {
+      background: var(--accent-color);
+      color: #ffffff;
+      border-color: var(--accent-color);
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 15px;
+      font-size: 0.8rem;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      padding: 8px 12px;
+      border-radius: 20px;
+    }
+
+    .legend-item { display: flex; align-items: center; gap: 5px; }
+    .dot-sample {
+      width: 18px; height: 18px; border-radius: 50%; display: inline-flex;
+      align-items: center; justify-content: center; font-size: 0.65rem; font-weight: bold; color: #fff;
+    }
+
+    /* Griglia del Manico */
+    .fretboard-container {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      padding: 20px 10px;
+      border-radius: 10px;
+      width: 100%;
+      max-width: 500px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      overflow-x: auto;
+    }
+
+    .fretboard {
+      display: grid;
+      grid-template-columns: 35px repeat(5, 1fr);
+      position: relative;
+      user-select: none;
+    }
+
+    .fret-header {
+      text-align: center;
+      font-size: 0.85rem;
+      color: #475569;
+      padding-bottom: 8px;
+      font-weight: bold;
+    }
+
+    .string-label {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: var(--accent-color);
+      font-size: 0.9rem;
+    }
+
+    .fret-cell {
+      position: relative;
+      height: 44px;
+      border-right: 2px solid var(--fret-color);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .fret-cell.is-nut {
+      border-right: 4px solid #334155;
+      background-color: #f1f5f9;
+    }
+
+    .fret-cell:nth-child(6n) { border-right: none; }
+
+    /* Corda orizzontale */
+    .string-line {
+      position: absolute;
+      left: 0; right: 0; top: 50%;
+      background-color: var(--string-color);
+      transform: translateY(-50%);
+      z-index: 1;
+    }
+
+    .s1 .string-line { height: 1px; }
+    .s2 .string-line { height: 1.5px; }
+    .s3 .string-line { height: 2px; }
+    .s4 .string-line { height: 2.5px; }
+    .s5 .string-line { height: 3px; }
+    .s6 .string-line { height: 3.5px; }
+
+    /* Pallino Nota */
+    .note-dot {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      font-weight: bold;
+      color: #fff;
+      z-index: 2;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+      transition: all 0.2s ease;
+    }
+
+    .note-root-maj { background-color: var(--root-maj-color); color: #fff; }
+    .note-root-min { background-color: var(--root-min-color); color: #fff; }
+    .note-chord { background-color: var(--chord-color); color: #000; }
+    .note-scale { background-color: var(--scale-color); color: #000; }
+  </style>
+
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#2563eb">
+
+</head>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js')
+        .then((reg) => console.log('Service Worker registrato con successo:', reg.scope))
+        .catch((err) => console.error('Registrazione Service Worker fallita:', err));
+    });
+  }
+</script>
+
+<body>
+
+  <h1>CAGED & Scale Trainer</h1>
+
+  <!-- Box Informativo Dinamico -->
+  <div class="info-box" id="info-box">
+    Caricamento informazioni...
+  </div>
+
+  <div class="controls">
+    <div class="control-group">
+      <label for="root-select">Tonalità Maggiore</label>
+      <select id="root-select"></select>
+    </div>
+
+    <div class="control-group">
+      <label for="scale-select">Tipo Scala</label>
+      <select id="scale-select">
+        <option value="major">Scala Maggiore</option>
+        <option value="pentatonic_major">Pentatonica Maggiore</option>
+      </select>
+    </div>
+
+    <div class="control-group">
+      <label for="caged-select">Forma CAGED (Maggiore)</label>
+      <select id="caged-select">
+        <option value="C" selected>Forma C</option>
+        <option value="A">Forma A</option>
+        <option value="G">Forma G</option>
+        <option value="E">Forma E</option>
+        <option value="D">Forma D</option>
+      </select>
+    </div>
+
+    <div class="control-group">
+      <label for="tuning-select">Accordatura</label>
+      <select id="tuning-select">
+        <option value="Standard">Standard (E A D G B E)</option>
+        <option value="Drop D">Drop D (D A D G B E)</option>
+        <option value="DADGAD">DADGAD</option>
+        <option value="Open G">Open G (D G D G B D)</option>
+        <option value="Open D">Open D (D A D F# A D)</option>
+      </select>
+    </div>
+
+    <div class="control-group full-width">
+      <label>Evidenzia sulla Scala:</label>
+      <div class="view-mode-group">
+        <button class="view-btn active" data-mode="maj">Accordo Maggiore</button>
+        <button class="view-btn" data-mode="min">Relativo Minore</button>
+        <button class="view-btn" data-mode="both">Entrambi</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="legend">
+    <div class="legend-item">
+      <div class="dot-sample" style="background:var(--root-maj-color)">R</div> Tonica Maj
+    </div>
+    <div class="legend-item">
+      <div class="dot-sample" style="background:var(--root-min-color)">Rm</div> Tonica min
+    </div>
+    <div class="legend-item">
+      <div class="dot-sample" style="background:var(--chord-color); color:#000">3M</div> Accordo
+    </div>
+    <div class="legend-item">
+      <div class="dot-sample" style="background:var(--scale-color); color:#000">●</div> Scala
+    </div>
+  </div>
+
+  <div class="fretboard-container">
+    <div class="fretboard" id="fretboard"></div>
+  </div>
+
+  <script>
+    const CHROMATIC_SCALE = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+    const ROMAN_NUMERALS = ["0", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII", "XIII", "XIV", "XV", "XVI", "XVII", "XVIII", "XIX", "XX", "XXI", "XXII", "XXIII", "XXIV"];
+
+    const TUNINGS = {
+      "Standard": ["E", "B", "G", "D", "A", "E"],
+      "Drop D":   ["E", "B", "G", "D", "A", "D"],
+      "DADGAD":   ["D", "A", "G", "D", "A", "D"],
+      "Open G":   ["D", "B", "G", "D", "G", "D"],
+      "Open D":   ["D", "A", "F#", "D", "A", "D"]
+    };
+
+    const SCALE_INTERVALS = {
+      "major": [0, 2, 4, 5, 7, 9, 11],
+      "pentatonic_major": [0, 2, 4, 7, 9]
+    };
+
+    // Corrispondenza Formen CAGED: Forma Maggiore -> Forma Relativo Minore
+    const CAGED_RELATIVE_MAP = {
+      "C": "A",
+      "A": "G",
+      "G": "E",
+      "E": "D",
+      "D": "C"
+    };
+
+    const CAGED_OFFSETS = {
+      "E": { string: 5, offset: 0 },
+      "A": { string: 4, offset: 0 },
+      "D": { string: 3, offset: 0 },
+      "C": { string: 4, offset: -3 },
+      "G": { string: 5, offset: -3 }
+    };
+
+    let currentViewMode = "maj"; // 'maj', 'min', 'both'
+
+    const rootSelect = document.getElementById("root-select");
+    CHROMATIC_SCALE.forEach(note => {
+      const opt = document.createElement("option");
+      opt.value = note;
+      opt.textContent = note;
+      rootSelect.appendChild(opt);
+    });
+    rootSelect.value = "C";
+
+    const scaleSelect = document.getElementById("scale-select");
+    const cagedSelect = document.getElementById("caged-select");
+    const tuningSelect = document.getElementById("tuning-select");
+    const fretboardEl = document.getElementById("fretboard");
+    const infoBoxEl = document.getElementById("info-box");
+
+    // Event listener selettore vista
+    document.querySelectorAll(".view-btn").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        document.querySelectorAll(".view-btn").forEach(b => b.classList.remove("active"));
+        e.target.classList.add("active");
+        currentViewMode = e.target.getAttribute("data-mode");
+        render();
+      });
+    });
+
+    [rootSelect, scaleSelect, cagedSelect, tuningSelect].forEach(el => {
+      el.addEventListener("change", render);
+    });
+
+    function getNoteAt(openNote, fret) {
+      const startIndex = CHROMATIC_SCALE.indexOf(openNote);
+      return CHROMATIC_SCALE[(startIndex + fret) % 12];
+    }
+
+    function getSemitonesFromRoot(root, note) {
+      const rootIdx = CHROMATIC_SCALE.indexOf(root);
+      const noteIdx = CHROMATIC_SCALE.indexOf(note);
+      return (noteIdx - rootIdx + 12) % 12;
+    }
+
+    function render() {
+      const majRoot = rootSelect.value;
+      const scaleType = scaleSelect.value;
+      const majCagedForm = cagedSelect.value;
+      const tuning = TUNINGS[tuningSelect.value];
+
+      // Calcolo Tonica Minore Relativa (VI grado = 9 semitoni sopra / 3 sotto)
+      const minRootIndex = (CHROMATIC_SCALE.indexOf(majRoot) + 9) % 12;
+      const minRoot = CHROMATIC_SCALE[minRootIndex];
+      const minCagedForm = CAGED_RELATIVE_MAP[majCagedForm];
+
+      // Aggiornamento Box Informativo
+      infoBoxEl.innerHTML = `
+        <strong>Tonalità:</strong> ${majRoot} Maggiore &bull; <strong>Relativo Minore:</strong> ${minRoot} Minore<br>
+        <strong>Stesso Box:</strong> Forma <strong>${majCagedForm}</strong> (${majRoot} Maj) &harr; Forma <strong>${minCagedForm}</strong> (${minRoot} min)
+      `;
+
+      // Note della scala (riferita alla tonica maggiore)
+      const scaleNotes = SCALE_INTERVALS[scaleType].map(i => CHROMATIC_SCALE[(CHROMATIC_SCALE.indexOf(majRoot) + i) % 12]);
+
+      // Note Triade Maggiore: 0 (R), 4 (3M), 7 (5)
+      // Note Triade Minore: 9 (Rm), 0 (3m rispetto a Rm), 4 (5 rispetto a Rm)
+      const majChordSemitones = [0, 4, 7];
+      const minChordSemitones = [9, 0, 4]; // semitoni rispetto alla tonica maggiore
+
+      const refStringOpenNote = tuning[CAGED_OFFSETS[majCagedForm].string];
+      let rootFret = 0;
+      while (getNoteAt(refStringOpenNote, rootFret) !== majRoot && rootFret < 12) {
+        rootFret++;
+      }
+      
+      let baseFret = rootFret + CAGED_OFFSETS[majCagedForm].offset;
+      if (baseFret < 0) baseFret += 12;
+
+      fretboardEl.innerHTML = "";
+
+      // Intestazione tasti
+      fretboardEl.appendChild(document.createElement("div"));
+      for (let f = 0; f < 5; f++) {
+        const header = document.createElement("div");
+        header.className = "fret-header";
+        const currentFretNum = baseFret + f;
+        header.textContent = ROMAN_NUMERALS[currentFretNum] || currentFretNum;
+        fretboardEl.appendChild(header);
+      }
+
+      // Corde
+      for (let s = 0; s < 6; s++) {
+        const openNote = tuning[s];
+
+        const stringLabel = document.createElement("div");
+        stringLabel.className = "string-label";
+        stringLabel.textContent = openNote;
+        fretboardEl.appendChild(stringLabel);
+
+        for (let f = 0; f < 5; f++) {
+          const currentFret = baseFret + f;
+          const note = getNoteAt(openNote, currentFret);
+
+          const cell = document.createElement("div");
+          cell.className = `fret-cell s${s + 1}`;
+          if (currentFret === 0) cell.classList.add("is-nut");
+
+          const line = document.createElement("div");
+          line.className = "string-line";
+          cell.appendChild(line);
+
+          const isWithinFourFrets = (currentFret >= baseFret && currentFret < baseFret + 4) || currentFret === 0;
+
+          if (scaleNotes.includes(note) && isWithinFourFrets) {
+            const dot = document.createElement("div");
+            dot.className = "note-dot";
+
+            const semitonesFromMaj = getSemitonesFromRoot(majRoot, note);
+
+            const isMajRoot = (semitonesFromMaj === 0);
+            const isMinRoot = (semitonesFromMaj === 9);
+            const isMajChord = majChordSemitones.includes(semitonesFromMaj);
+            const isMinChord = minChordSemitones.includes(semitonesFromMaj);
+
+            // Logica di visualizzazione in base al selettore Modalità
+            if (currentViewMode === "maj") {
+              if (isMajRoot) {
+                dot.classList.add("note-root-maj");
+                dot.textContent = "R";
+              } else if (isMajChord) {
+                dot.classList.add("note-chord");
+                dot.textContent = semitonesFromMaj === 4 ? "3M" : "5";
+              } else {
+                dot.classList.add("note-scale");
+                dot.textContent = note;
+              }
+            } else if (currentViewMode === "min") {
+              if (isMinRoot) {
+                dot.classList.add("note-root-min");
+                dot.textContent = "Rm";
+              } else if (isMinChord) {
+                dot.classList.add("note-chord");
+                dot.textContent = semitonesFromMaj === 0 ? "3m" : "5";
+              } else {
+                dot.classList.add("note-scale");
+                dot.textContent = note;
+              }
+            } else if (currentViewMode === "both") {
+              if (isMajRoot) {
+                dot.classList.add("note-root-maj");
+                dot.textContent = "R";
+              } else if (isMinRoot) {
+                dot.classList.add("note-root-min");
+                dot.textContent = "Rm";
+              } else if (isMajChord || isMinChord) {
+                dot.classList.add("note-chord");
+                if (semitonesFromMaj === 4) dot.textContent = "3M";
+                else if (semitonesFromMaj === 7) dot.textContent = "5";
+                else dot.textContent = note;
+              } else {
+                dot.classList.add("note-scale");
+                dot.textContent = note;
+              }
+            }
+
+            cell.appendChild(dot);
+          }
+
+          fretboardEl.appendChild(cell);
+        }
+      }
+    }
+
+    render();
+  </script>
+</body>
+</html>
