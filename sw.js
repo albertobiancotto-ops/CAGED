@@ -1,21 +1,20 @@
-const CACHE_NAME = 'caged-trainer-v5'; //
+```javascript:Service Worker:sw.js
+const CACHE_NAME = 'caged-trainer-v8';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './manifest.json'
 ];
 
-// Installazione: scarica i nuovi file e sostituisce la versione precedente
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll(ASSETS_TO_CACHE);
     })
   );
-  self.skipWaiting(); // Attiva subito la nuova versione del Service Worker
+  self.skipWaiting();
 });
 
-// Attivazione: cancella automaticamente la vecchia cache v1
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys().then((keys) => {
@@ -31,7 +30,6 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// Intercettazione richieste: serve dalla cache per l'offline, ma aggiorna in background
 self.addEventListener('fetch', (event) => {
   event.respondWith(
     caches.match(event.request).then((response) => {
