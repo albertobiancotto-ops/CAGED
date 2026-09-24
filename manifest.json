@@ -1,8 +1,10 @@
 {
+  "id": "/CAGED/",
   "name": "CAGED & Scale Trainer",
   "short_name": "CAGED Trainer",
-  "description": "App per lo studio delle scale e degli accordi con metodo CAGED",
-  "start_url": "./index.html",
+  "description": "App per lo studio delle scale e degli accordi sulla chitarra con metodo CAGED.",
+  "start_url": "index.html",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#2563eb",
