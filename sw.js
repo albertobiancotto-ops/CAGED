@@ -1,4 +1,4 @@
-const CACHE_NAME = 'caged-trainer-v2'; // Incrementato a v2 per forzare il refresh
+const CACHE_NAME = 'caged-trainer-v5'; //
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
