@@ -15,11 +15,10 @@
       --border-color: #e2e8f0;
       --text-color: #1e293b;
       --accent-color: #2563eb;
-      --root-maj-color: #ef4444;   /* Rosso Tonica Maj */
-      --root-min-color: #8b5cf6;   /* Viola Tonica min */
-      --chord-color: #f59e0b;      /* Arancione Accordo */
-      --scale-color: #10b981;      /* Verde Scala */
-      --blue-note-color: #06b6d4;  /* Ciano Blue Note */
+      --root-color: #ef4444;       /* Rosso Tonica Accordo */
+      --chord-color: #f59e0b;      /* Arancione 3a, 5a, 7a */
+      --scale-color: #10b981;      /* Verde Note Scala */
+      --blue-note-color: #0284c7;  /* Blu Blue Note */
       --fret-color: #94a3b8;
       --string-color: #64748b;
     }
@@ -47,7 +46,7 @@
 
     h1 { font-size: 1.3rem; margin-bottom: 10px; text-align: center; }
 
-    /* Navigazione a Schede (Tab) */
+    /* Navigazione a 4 Schede (Tab) */
     .tab-nav {
       display: flex;
       width: 100%;
@@ -61,12 +60,12 @@
 
     .tab-btn {
       flex: 1;
-      padding: 10px 5px;
+      padding: 10px 2px;
       border: none;
       background: transparent;
       color: var(--text-color);
       font-weight: bold;
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       cursor: pointer;
       text-align: center;
     }
@@ -84,14 +83,18 @@
 
     .tab-content.active { display: block; }
 
-    /* Box Informativo */
-    .info-box {
-      background: rgba(37, 99, 235, 0.08);
+    /* Box Sintesi Accordo (Note dell'accordo selezionato) */
+    .chord-summary-box {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
       border-left: 4px solid var(--accent-color);
-      padding: 10px;
-      border-radius: 6px;
+      padding: 10px 14px;
+      border-radius: 8px;
       margin-bottom: 12px;
-      font-size: 0.85rem;
+      font-size: 1rem;
+      font-weight: bold;
+      text-align: center;
+      color: var(--text-color);
     }
 
     .controls {
@@ -129,7 +132,7 @@
 
     .toggle-btn {
       flex: 1;
-      padding: 6px 4px;
+      padding: 8px 4px;
       font-size: 0.75rem;
       font-weight: bold;
       border: 1px solid var(--border-color);
@@ -143,25 +146,6 @@
       background: #10b981;
       color: #ffffff;
       border-color: #10b981;
-    }
-
-    .legend {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 8px;
-      margin-bottom: 12px;
-      font-size: 0.75rem;
-      background: var(--card-bg);
-      border: 1px solid var(--border-color);
-      padding: 6px 10px;
-      border-radius: 20px;
-    }
-
-    .legend-item { display: flex; align-items: center; gap: 4px; }
-    .dot-sample {
-      width: 16px; height: 16px; border-radius: 50%; display: inline-flex;
-      align-items: center; justify-content: center; font-size: 0.6rem; font-weight: bold; color: #fff;
     }
 
     /* Griglia Manico */
@@ -180,8 +164,7 @@
     }
 
     .fretboard.full-neck {
-      grid-template-columns: 30px repeat(12, 40px);
-      min-width: 510px;
+      display: grid;
     }
 
     .fret-header {
@@ -239,13 +222,12 @@
       z-index: 2;
     }
 
-    .note-root-maj { background-color: var(--root-maj-color); }
-    .note-root-min { background-color: var(--root-min-color); }
+    .note-root { background-color: var(--root-color); color: #fff; }
     .note-chord { background-color: var(--chord-color); color: #000; }
     .note-scale { background-color: var(--scale-color); color: #000; }
-    .note-blue { background-color: var(--blue-note-color); color: #000; }
+    .note-blue { background-color: var(--blue-note-color); color: #fff; }
 
-    /* Trainer Quiz Box */
+    /* Quiz Card */
     .quiz-card {
       background: var(--card-bg);
       border: 1px solid var(--border-color);
@@ -266,16 +248,21 @@
 
   <h1>CAGED & Scale Trainer</h1>
 
-  <!-- Navigazione a Schede -->
+  <!-- Navigazione a 4 Schede -->
   <div class="tab-nav">
-    <button class="tab-btn active" onclick="switchTab('tab-practice')">Studio (Box)</button>
-    <button class="tab-btn" onclick="switchTab('tab-full')">Manico (12 Tasti)</button>
-    <button class="tab-btn" onclick="switchTab('tab-settings')">Quiz & Opzioni</button>
+    <button class="tab-btn active" onclick="switchTab(event, 'tab-practice')">Studio</button>
+    <button class="tab-btn" onclick="switchTab(event, 'tab-full')">Manico</button>
+    <button class="tab-btn" onclick="switchTab(event, 'tab-quiz')">Quiz</button>
+    <button class="tab-btn" onclick="switchTab(event, 'tab-settings')">Opzioni</button>
   </div>
 
   <!-- TAB 1: STUDIO (BOX A 4 TASTI) -->
   <div id="tab-practice" class="tab-content active">
-    <div class="info-box" id="info-box">Caricamento...</div>
+    
+    <!-- Box Sintesi Accordo Selezionato -->
+    <div class="chord-summary-box" id="chord-summary-box">
+      Accordo: C = C - E - G
+    </div>
 
     <div class="controls">
       <div class="control-group">
@@ -300,8 +287,8 @@
             <option value="mode_locrian">Locrio (vii°)</option>
           </optgroup>
           <optgroup label="Arpeggi / Triadi">
-            <option value="arp_maj">Arpeggio Maggiore (Triade)</option>
-            <option value="arp_min">Arpeggio Minore (Triade)</option>
+            <option value="arp_maj">Arpeggio Maggiore</option>
+            <option value="arp_min">Arpeggio Minore</option>
             <option value="arp_maj7">Arpeggio Maj7</option>
             <option value="arp_dom7">Arpeggio Dominante 7</option>
             <option value="arp_m7">Arpeggio m7</option>
@@ -332,37 +319,48 @@
       </div>
     </div>
 
-    <div class="legend">
-      <div class="legend-item"><div class="dot-sample" style="background:var(--root-maj-color)">R</div> Tonica</div>
-      <div class="legend-item"><div class="dot-sample" style="background:var(--root-min-color)">Rm</div> Tonica min</div>
-      <div class="legend-item"><div class="dot-sample" style="background:var(--chord-color); color:#000">3M</div> Accordo</div>
-      <div class="legend-item"><div class="dot-sample" style="background:var(--scale-color); color:#000">●</div> Scala</div>
-      <div class="legend-item"><div class="dot-sample" style="background:var(--blue-note-color); color:#000">♭5</div> Blue Note</div>
-    </div>
-
     <div class="fretboard-container">
       <div class="fretboard" id="fretboard-box"></div>
     </div>
   </div>
 
-  <!-- TAB 2: MANICO INTERO (12 TASTI) -->
+  <!-- TAB 2: MANICO COMPLETO -->
   <div id="tab-full" class="tab-content">
-    <div class="info-box">Vista completa 12 Tasti: Osserva la sequenza continua delle 5 forme CAGED lungo il manico.</div>
     <div class="fretboard-container">
       <div class="fretboard full-neck" id="fretboard-full"></div>
     </div>
   </div>
 
-  <!-- TAB 3: QUIZ & IMPOSTAZIONI -->
-  <div id="tab-settings" class="tab-content">
+  <!-- TAB 3: QUIZ (ALLENAMENTO) -->
+  <div id="tab-quiz" class="tab-content">
     <div class="quiz-card">
       <h3>Generatore di Esercizi (Flashcard)</h3>
-      <p style="font-size: 0.85rem; margin-top: 5px;">Sfida la memoria visiva: trova subito la posizione sul manico!</p>
+      <p style="font-size: 0.85rem; margin-top: 5px;">Trova subito la posizione esatta sul manico della chitarra!</p>
       <div class="quiz-target" id="quiz-target">Premi "Nuova Sfida"</div>
       <button class="action-btn" style="background: var(--accent-color); color: #fff; font-weight: bold; width: 100%;" onclick="generateQuiz()">Nuova Sfida Casual</button>
     </div>
+  </div>
 
-    <div class="controls" style="margin-top: 15px;">
+  <!-- TAB 4: OPZIONI & IMPOSTAZIONI -->
+  <div id="tab-settings" class="tab-content">
+    <div class="controls">
+      <div class="control-group full">
+        <label for="seventh-chords-select">Accordi di Settima (Quadriadi)</label>
+        <select id="seventh-chords-select" onchange="toggleSeventhChords(this.value)">
+          <option value="off" selected>Off (Triadi a 3 note)</option>
+          <option value="on">On (Quadriadi di 7a a 4 note)</option>
+        </select>
+      </div>
+
+      <div class="control-group full">
+        <label for="neck-length-select">Lunghezza Manico (Scheda Manico)</label>
+        <select id="neck-length-select" onchange="changeNeckLength(this.value)">
+          <option value="12">12 Tasti</option>
+          <option value="22" selected>22 Tasti</option>
+          <option value="24">24 Tasti</option>
+        </select>
+      </div>
+
       <div class="control-group full">
         <label for="tuning-select">Accordatura Strumento</label>
         <select id="tuning-select">
@@ -374,7 +372,7 @@
         </select>
       </div>
 
-      <div class="control-group full">
+      <div class="control-group full" style="margin-top: 10px;">
         <button class="action-btn" id="btn-theme" onclick="toggleDarkMode()">Attiva Tema Scuro (Dark Mode)</button>
       </div>
     </div>
@@ -383,7 +381,7 @@
   <script>
     const NOTES_SHARP = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
     const NOTES_FLAT  = ["C", "Db", "D", "Eb", "E", "F", "Gb", "G", "Ab", "A", "Bb", "B"];
-    const ROMAN_NUMERALS = ["0", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII", "XIII", "XIV", "XV", "XVI", "XVII", "XVIII", "XIX", "XX"];
+    const ROMAN_NUMERALS = ["0", "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X", "XI", "XII", "XIII", "XIV", "XV", "XVI", "XVII", "XVIII", "XIX", "XX", "XXI", "XXII", "XXIII", "XXIV"];
 
     const TUNINGS = {
       "Standard": ["E", "B", "G", "D", "A", "E"],
@@ -410,17 +408,27 @@
       "arp_m7": [0, 3, 7, 10]
     };
 
-    const MAJOR_HARMONY = [
-      { degree: "I", type: "Maj", semitones: 0, chordType: "maj" },
-      { degree: "ii", type: "min", semitones: 2, chordType: "min" },
-      { degree: "iii", type: "min", semitones: 4, chordType: "min" },
-      { degree: "IV", type: "Maj", semitones: 5, chordType: "maj" },
-      { degree: "V", type: "Maj", semitones: 7, chordType: "maj" },
-      { degree: "vi", type: "min (Relativo)", semitones: 9, chordType: "min" },
-      { degree: "vii°", type: "dim", semitones: 11, chordType: "dim" }
+    // Struttura Armonica dei gradi (Triadi e Quadriadi)
+    const MAJOR_HARMONY_TRIADS = [
+      { degree: "I", type: "", semitones: 0, chordType: "maj", intervals: [0, 4, 7] },
+      { degree: "ii", type: "min", semitones: 2, chordType: "min", intervals: [0, 3, 7] },
+      { degree: "iii", type: "min", semitones: 4, chordType: "min", intervals: [0, 3, 7] },
+      { degree: "IV", type: "", semitones: 5, chordType: "maj", intervals: [0, 4, 7] },
+      { degree: "V", type: "", semitones: 7, chordType: "maj", intervals: [0, 4, 7] },
+      { degree: "vi", type: "min", semitones: 9, chordType: "min", intervals: [0, 3, 7] },
+      { degree: "vii°", type: "dim", semitones: 11, chordType: "dim", intervals: [0, 3, 6] }
     ];
 
-    const CAGED_RELATIVE_MAP = { "C":"A", "A":"G", "G":"E", "E":"D", "D":"C" };
+    const MAJOR_HARMONY_SEVENTHS = [
+      { degree: "I", type: "maj7", semitones: 0, chordType: "maj7", intervals: [0, 4, 7, 11] },
+      { degree: "ii", type: "m7", semitones: 2, chordType: "m7", intervals: [0, 3, 7, 10] },
+      { degree: "iii", type: "m7", semitones: 4, chordType: "m7", intervals: [0, 3, 7, 10] },
+      { degree: "IV", type: "maj7", semitones: 5, chordType: "maj7", intervals: [0, 4, 7, 11] },
+      { degree: "V", type: "7", semitones: 7, chordType: "dom7", intervals: [0, 4, 7, 10] },
+      { degree: "vi", type: "m7", semitones: 9, chordType: "m7", intervals: [0, 3, 7, 10] },
+      { degree: "vii°", type: "m7♭5", semitones: 11, chordType: "m7b5", intervals: [0, 3, 6, 10] }
+    ];
+
     const CAGED_OFFSETS = {
       "E": { string: 5, offset: -1 },
       "A": { string: 4, offset: -1 },
@@ -429,15 +437,16 @@
       "G": { string: 5, offset: -3 }
     };
 
-    // Stato Globale dell'App
+    // Stato Globale dell'Applicazione
     let state = {
       useFlats: false,
       rootOnly: false,
       blueNote: false,
-      isDark: false
+      isDark: false,
+      useSevenths: false,
+      neckLength: 22
     };
 
-    // Inizializzazione Selezione Note
     function getNotes() { return state.useFlats ? NOTES_FLAT : NOTES_SHARP; }
 
     const rootSelect = document.getElementById("root-select");
@@ -466,31 +475,28 @@
       const prev = chordSelect.value;
       chordSelect.innerHTML = "";
 
-      MAJOR_HARMONY.forEach(item => {
+      const harmonyList = state.useSevenths ? MAJOR_HARMONY_SEVENTHS : MAJOR_HARMONY_TRIADS;
+
+      harmonyList.forEach(item => {
         const note = notes[(rootIdx + item.semitones) % 12];
         const opt = document.createElement("option");
         opt.value = `${item.semitones}_${item.chordType}`;
-        opt.textContent = `${item.degree}: ${note} ${item.type}`;
+        const chordName = item.type ? `${note}${item.type}` : note;
+        opt.textContent = `${item.degree}: ${chordName}`;
         chordSelect.appendChild(opt);
       });
-
-      const bothOpt = document.createElement("option");
-      bothOpt.value = "both";
-      bothOpt.textContent = "Mostra Entrambi (I + vi° Minore)";
-      chordSelect.appendChild(bothOpt);
 
       if (prev && Array.from(chordSelect.options).some(o => o.value === prev)) {
         chordSelect.value = prev;
       } else {
-        chordSelect.value = "0_maj";
+        chordSelect.value = state.useSevenths ? "0_maj7" : "0_maj";
       }
     }
 
-    // Navigazione Schede
-    function switchTab(tabId) {
+    function switchTab(evt, tabId) {
       document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
       document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-      event.target.classList.add('active');
+      evt.target.classList.add('active');
       document.getElementById(tabId).classList.add('active');
       render();
     }
@@ -499,6 +505,16 @@
       state[key] = !state[key];
       if (key === 'useFlats') populateRoots();
       document.getElementById(`btn-${key === 'useFlats' ? 'accidental' : (key === 'rootOnly' ? 'root-only' : 'blue-note')}`).classList.toggle('active', state[key]);
+      render();
+    }
+
+    function toggleSeventhChords(val) {
+      state.useSevenths = (val === "on");
+      render();
+    }
+
+    function changeNeckLength(val) {
+      state.neckLength = parseInt(val, 10);
       render();
     }
 
@@ -538,19 +554,23 @@
       const tuning = TUNINGS[tuningSelect.value];
       const selectedChordMode = chordSelect.value;
 
-      const minRoot = notes[(notes.indexOf(majRoot) + 9) % 12];
-      const minCagedForm = CAGED_RELATIVE_MAP[cagedForm];
-
-      document.getElementById('info-box').innerHTML = `
-        <strong>Tonalità:</strong> ${majRoot} Maj &bull; <strong>Relativo Minore:</strong> ${minRoot} min<br>
-        <strong>Stesso Box:</strong> Forma <strong>${cagedForm}</strong> (${majRoot}) &harr; Forma <strong>${minCagedForm}</strong> (${minRoot}m)
-      `;
-
       const scaleIntervals = SCALE_INTERVALS[scaleType] || SCALE_INTERVALS["major"];
       const scaleNotes = scaleIntervals.map(i => notes[(notes.indexOf(majRoot) + i) % 12]);
       
-      // Calcolo della Blue Note (5a diminuita = 6 semitoni dalla tonica minore o 3 semitoni dalla tonica maggiore)
       const blueNoteName = state.blueNote ? notes[(notes.indexOf(majRoot) + 3) % 12] : null;
+
+      // Generazione Formula e Sintesi Accordo per il box
+      const [offsetStr, chordType] = selectedChordMode.split("_");
+      const chordOffset = parseInt(offsetStr, 10);
+      const chordRootNote = notes[(notes.indexOf(majRoot) + chordOffset) % 12];
+
+      const harmonyList = state.useSevenths ? MAJOR_HARMONY_SEVENTHS : MAJOR_HARMONY_TRIADS;
+      const currentHarmonyObj = harmonyList.find(h => h.semitones === chordOffset) || harmonyList[0];
+
+      const chordNotesList = currentHarmonyObj.intervals.map(sem => notes[(notes.indexOf(chordRootNote) + sem) % 12]);
+      const chordDisplayName = currentHarmonyObj.type ? `${chordRootNote}${currentHarmonyObj.type}` : chordRootNote;
+
+      document.getElementById('chord-summary-box').textContent = `${chordDisplayName} = ${chordNotesList.join(" - ")}`;
 
       const refStringOpen = tuning[CAGED_OFFSETS[cagedForm].string];
       let rootFret = 0;
@@ -560,14 +580,16 @@
       if (baseFret < 0) baseFret += 12;
 
       // Render Box 4 Tasti
-      renderFretboard(document.getElementById('fretboard-box'), baseFret, 5, tuning, majRoot, scaleNotes, blueNoteName, selectedChordMode);
+      renderFretboard(document.getElementById('fretboard-box'), baseFret, 5, tuning, majRoot, scaleNotes, blueNoteName, chordRootNote, chordNotesList);
 
-      // Render Manico Intero 12 Tasti
-      renderFretboard(document.getElementById('fretboard-full'), 0, 12, tuning, majRoot, scaleNotes, blueNoteName, selectedChordMode, true);
+      // Render Manico Completo (Tasti configurabili nelle Opzioni)
+      const fullNeckEl = document.getElementById('fretboard-full');
+      fullNeckEl.style.gridTemplateColumns = `30px repeat(${state.neckLength}, 40px)`;
+      fullNeckEl.style.minWidth = `${30 + state.neckLength * 40}px`;
+      renderFretboard(fullNeckEl, 0, state.neckLength + 1, tuning, majRoot, scaleNotes, blueNoteName, chordRootNote, chordNotesList, true);
     }
 
-    function renderFretboard(el, baseFret, numFrets, tuning, majRoot, scaleNotes, blueNoteName, selectedChordMode, isFull = false) {
-      const notes = getNotes();
+    function renderFretboard(el, baseFret, numFrets, tuning, majRoot, scaleNotes, blueNoteName, chordRootNote, chordNotesList, isFull = false) {
       el.innerHTML = "";
       el.appendChild(document.createElement("div"));
 
@@ -601,11 +623,12 @@
           const isWithin = isFull || (currentFret >= baseFret && currentFret < baseFret + 4) || currentFret === 0;
 
           if (isWithin && (scaleNotes.includes(note) || (state.blueNote && note === blueNoteName))) {
-            const semitonesFromMaj = getSemitonesFromRoot(majRoot, note);
+            const isRoot = (note === chordRootNote);
+            const isChordNote = chordNotesList.includes(note);
             const isBlue = (state.blueNote && note === blueNoteName);
 
             // Filtro Solo Toniche
-            if (state.rootOnly && semitonesFromMaj !== 0 && semitonesFromMaj !== 9) {
+            if (state.rootOnly && !isRoot) {
               el.appendChild(cell);
               continue;
             }
@@ -613,44 +636,18 @@
             const dot = document.createElement("div");
             dot.className = "note-dot";
 
-            if (isBlue) {
+            // Assegnazione Colori e Priorità Richiesta (Sempre il nome della nota sopra)
+            if (isRoot) {
+              dot.classList.add("note-root");
+            } else if (isChordNote) {
+              dot.classList.add("note-chord");
+            } else if (isBlue) {
               dot.classList.add("note-blue");
-              dot.textContent = "♭5";
-            } else if (selectedChordMode === "both") {
-              if (semitonesFromMaj === 0) { dot.classList.add("note-root-maj"); dot.textContent = "R"; }
-              else if (semitonesFromMaj === 9) { dot.classList.add("note-root-min"); dot.textContent = "Rm"; }
-              else if ([0,4,7].includes(semitonesFromMaj) || [9,0,4].includes(semitonesFromMaj)) {
-                dot.classList.add("note-chord");
-                dot.textContent = semitonesFromMaj === 4 ? "3M" : "5";
-              } else { dot.classList.add("note-scale"); dot.textContent = note; }
             } else {
-              const [offsetStr, chordType] = selectedChordMode.split("_");
-              const chordOffset = parseInt(offsetStr, 10);
-              const relSemitones = (semitonesFromMaj - chordOffset + 12) % 12;
-
-              let isChordNote = false;
-              let label = note;
-
-              if (chordType === "maj" && [0,4,7].includes(relSemitones)) {
-                isChordNote = true; label = relSemitones === 0 ? "R" : (relSemitones === 4 ? "3M" : "5");
-              } else if (chordType === "min" && [0,3,7].includes(relSemitones)) {
-                isChordNote = true; label = relSemitones === 0 ? "Rm" : (relSemitones === 3 ? "3m" : "5");
-              } else if (chordType === "dim" && [0,3,6].includes(relSemitones)) {
-                isChordNote = true; label = relSemitones === 0 ? "R°" : (relSemitones === 3 ? "3m" : "5♭");
-              }
-
-              if (semitonesFromMaj === chordOffset) {
-                dot.classList.add(chordType === "maj" ? "note-root-maj" : "note-root-min");
-                dot.textContent = label;
-              } else if (isChordNote) {
-                dot.classList.add("note-chord");
-                dot.textContent = label;
-              } else {
-                dot.classList.add("note-scale");
-                dot.textContent = note;
-              }
+              dot.classList.add("note-scale");
             }
 
+            dot.textContent = note;
             cell.appendChild(dot);
           }
 
