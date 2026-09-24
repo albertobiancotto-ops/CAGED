@@ -16,8 +16,8 @@
       --border-color: #e2e8f0;
       --text-color: #1e293b;
       --accent-color: #2563eb;
-      --root-maj-color: #ef4444;   /* Rosso per la Tonica Maggiore */
-      --root-min-color: #8b5cf6;   /* Viola per la Tonica Minore */
+      --root-maj-color: #ef4444;   /* Rosso per la Tonica */
+      --root-min-color: #8b5cf6;   /* Viola per la Tonica Minore/Gradi minori */
       --chord-color: #f59e0b;      /* Arancione per note dell'accordo */
       --scale-color: #10b981;      /* Verde per altre note della scala */
       --fret-color: #94a3b8;
@@ -87,30 +87,6 @@
       border-radius: 6px;
       font-size: 0.95rem;
       outline: none;
-    }
-
-    .view-mode-group {
-      display: flex;
-      gap: 8px;
-    }
-
-    .view-btn {
-      flex: 1;
-      padding: 8px 5px;
-      font-size: 0.8rem;
-      font-weight: bold;
-      border: 1px solid #cbd5e1;
-      background: #ffffff;
-      color: #475569;
-      border-radius: 6px;
-      cursor: pointer;
-      text-align: center;
-    }
-
-    .view-btn.active {
-      background: var(--accent-color);
-      color: #ffffff;
-      border-color: var(--accent-color);
     }
 
     .legend {
@@ -268,12 +244,8 @@
     </div>
 
     <div class="control-group full-width">
-      <label>Evidenzia sulla Scala:</label>
-      <div class="view-mode-group">
-        <button class="view-btn active" data-mode="maj">Accordo Maggiore</button>
-        <button class="view-btn" data-mode="min">Relativo Minore</button>
-        <button class="view-btn" data-mode="both">Entrambi</button>
-      </div>
+      <label for="chord-select">Accordo da evidenziare sulla Scala:</label>
+      <select id="chord-select"></select>
     </div>
   </div>
 
@@ -313,6 +285,17 @@
       "pentatonic_major": [0, 2, 4, 7, 9]
     };
 
+    // Struttura Armonica dei gradi della scala Maggiore
+    const MAJOR_SCALE_HARMONY = [
+      { degree: "I", type: "Maj", semitones: 0, chordType: "maj" },
+      { degree: "ii", type: "min", semitones: 2, chordType: "min" },
+      { degree: "iii", type: "min", semitones: 4, chordType: "min" },
+      { degree: "IV", type: "Maj", semitones: 5, chordType: "maj" },
+      { degree: "V", type: "Maj", semitones: 7, chordType: "maj" },
+      { degree: "vi", type: "min (Relativo)", semitones: 9, chordType: "min" },
+      { degree: "vii°", type: "dim", semitones: 11, chordType: "dim" }
+    ];
+
     const CAGED_RELATIVE_MAP = {
       "C": "A",
       "A": "G",
@@ -321,16 +304,13 @@
       "D": "C"
     };
 
-    // Mappatura aggiornata: sia E, A e D includono l'estensione a sinistra di 1 tasto (-1)
     const CAGED_OFFSETS = {
-      "E": { string: 5, offset: -1 },  // Box parte 1 tasto prima (per coprire le note arretrate sulla 3a e 4a corda)
-      "A": { string: 4, offset: -1 },  // Box parte 1 tasto prima
-      "D": { string: 3, offset: -1 },  // Box parte 1 tasto prima
-      "C": { string: 4, offset: -3 },  // Box parte 3 tasti prima
-      "G": { string: 5, offset: -3 }   // Box parte 3 tasti prima
+      "E": { string: 5, offset: -1 },
+      "A": { string: 4, offset: -1 },
+      "D": { string: 3, offset: -1 },
+      "C": { string: 4, offset: -3 },
+      "G": { string: 5, offset: -3 }
     };
-
-    let currentViewMode = "maj";
 
     const rootSelect = document.getElementById("root-select");
     CHROMATIC_SCALE.forEach(note => {
@@ -344,19 +324,52 @@
     const scaleSelect = document.getElementById("scale-select");
     const cagedSelect = document.getElementById("caged-select");
     const tuningSelect = document.getElementById("tuning-select");
+    const chordSelect = document.getElementById("chord-select");
     const fretboardEl = document.getElementById("fretboard");
     const infoBoxEl = document.getElementById("info-box");
 
-    document.querySelectorAll(".view-btn").forEach(btn => {
-      btn.addEventListener("click", (e) => {
-        document.querySelectorAll(".view-btn").forEach(b => b.classList.remove("active"));
-        e.target.classList.add("active");
-        currentViewMode = e.target.getAttribute("data-mode");
+    // Popola dinamicamente il menù a tendina degli accordi
+    function updateChordDropdown() {
+      const majRoot = rootSelect.value;
+      const scaleType = scaleSelect.value;
+      const previousValue = chordSelect.value;
+
+      chordSelect.innerHTML = "";
+
+      const rootIdx = CHROMATIC_SCALE.indexOf(majRoot);
+      const activeDegrees = scaleType === "major" 
+        ? MAJOR_SCALE_HARMONY 
+        : MAJOR_SCALE_HARMONY.filter(g => [0, 2, 4, 7, 9].includes(g.semitones));
+
+      activeDegrees.forEach(item => {
+        const chordNote = CHROMATIC_SCALE[(rootIdx + item.semitones) % 12];
+        const opt = document.createElement("option");
+        opt.value = `${item.semitones}_${item.chordType}`;
+        opt.textContent = `${item.degree} grado: ${chordNote} ${item.type}`;
+        chordSelect.appendChild(opt);
+      });
+
+      // Opzione per mostrare sia il Maggiore che il Relativo Minore
+      const bothOpt = document.createElement("option");
+      bothOpt.value = "both";
+      bothOpt.textContent = "Mostra Entrambi (I + vi° Relativo Minore)";
+      chordSelect.appendChild(bothOpt);
+
+      if (previousValue && Array.from(chordSelect.options).some(o => o.value === previousValue)) {
+        chordSelect.value = previousValue;
+      } else {
+        chordSelect.value = "0_maj"; // Default: Accordo di Tonica Maggiore
+      }
+    }
+
+    [rootSelect, scaleSelect].forEach(el => {
+      el.addEventListener("change", () => {
+        updateChordDropdown();
         render();
       });
     });
 
-    [rootSelect, scaleSelect, cagedSelect, tuningSelect].forEach(el => {
+    [cagedSelect, tuningSelect, chordSelect].forEach(el => {
       el.addEventListener("change", render);
     });
 
@@ -376,6 +389,7 @@
       const scaleType = scaleSelect.value;
       const majCagedForm = cagedSelect.value;
       const tuning = TUNINGS[tuningSelect.value];
+      const selectedChordMode = chordSelect.value;
 
       const minRootIndex = (CHROMATIC_SCALE.indexOf(majRoot) + 9) % 12;
       const minRoot = CHROMATIC_SCALE[minRootIndex];
@@ -387,9 +401,6 @@
       `;
 
       const scaleNotes = SCALE_INTERVALS[scaleType].map(i => CHROMATIC_SCALE[(CHROMATIC_SCALE.indexOf(majRoot) + i) % 12]);
-
-      const majChordSemitones = [0, 4, 7];
-      const minChordSemitones = [9, 0, 4];
 
       const refStringOpenNote = tuning[CAGED_OFFSETS[majCagedForm].string];
       let rootFret = 0;
@@ -433,7 +444,6 @@
           line.className = "string-line";
           cell.appendChild(line);
 
-          // Estensione del box a 4 tasti (o corda a vuoto 0)
           const isWithinFourFrets = (currentFret >= baseFret && currentFret < baseFret + 4) || currentFret === 0;
 
           if (scaleNotes.includes(note) && isWithinFourFrets) {
@@ -442,34 +452,13 @@
 
             const semitonesFromMaj = getSemitonesFromRoot(majRoot, note);
 
-            const isMajRoot = (semitonesFromMaj === 0);
-            const isMinRoot = (semitonesFromMaj === 9);
-            const isMajChord = majChordSemitones.includes(semitonesFromMaj);
-            const isMinChord = minChordSemitones.includes(semitonesFromMaj);
+            if (selectedChordMode === "both") {
+              // Modalità vista doppia (I Maj + vi min)
+              const isMajRoot = (semitonesFromMaj === 0);
+              const isMinRoot = (semitonesFromMaj === 9);
+              const isMajChord = [0, 4, 7].includes(semitonesFromMaj);
+              const isMinChord = [9, 0, 4].includes(semitonesFromMaj);
 
-            if (currentViewMode === "maj") {
-              if (isMajRoot) {
-                dot.classList.add("note-root-maj");
-                dot.textContent = "R";
-              } else if (isMajChord) {
-                dot.classList.add("note-chord");
-                dot.textContent = semitonesFromMaj === 4 ? "3M" : "5";
-              } else {
-                dot.classList.add("note-scale");
-                dot.textContent = note;
-              }
-            } else if (currentViewMode === "min") {
-              if (isMinRoot) {
-                dot.classList.add("note-root-min");
-                dot.textContent = "Rm";
-              } else if (isMinChord) {
-                dot.classList.add("note-chord");
-                dot.textContent = semitonesFromMaj === 0 ? "3m" : "5";
-              } else {
-                dot.classList.add("note-scale");
-                dot.textContent = note;
-              }
-            } else if (currentViewMode === "both") {
               if (isMajRoot) {
                 dot.classList.add("note-root-maj");
                 dot.textContent = "R";
@@ -485,6 +474,39 @@
                 dot.classList.add("note-scale");
                 dot.textContent = note;
               }
+            } else {
+              // Modalità accordo singolo selezionato dal menù
+              const [chordOffsetStr, chordType] = selectedChordMode.split("_");
+              const chordOffset = parseInt(chordOffsetStr, 10);
+              const isChordRoot = (semitonesFromMaj === chordOffset);
+
+              // Intervalli dell'accordo rispetto alla sua tonica
+              let relSemitones = (semitonesFromMaj - chordOffset + 12) % 12;
+
+              let isChordNote = false;
+              let label = note;
+
+              if (chordType === "maj" && [0, 4, 7].includes(relSemitones)) {
+                isChordNote = true;
+                label = relSemitones === 0 ? "R" : (relSemitones === 4 ? "3M" : "5");
+              } else if (chordType === "min" && [0, 3, 7].includes(relSemitones)) {
+                isChordNote = true;
+                label = relSemitones === 0 ? "Rm" : (relSemitones === 3 ? "3m" : "5");
+              } else if (chordType === "dim" && [0, 3, 6].includes(relSemitones)) {
+                isChordNote = true;
+                label = relSemitones === 0 ? "R°" : (relSemitones === 3 ? "3m" : "5b");
+              }
+
+              if (isChordRoot) {
+                dot.classList.add(chordType === "maj" ? "note-root-maj" : "note-root-min");
+                dot.textContent = label;
+              } else if (isChordNote) {
+                dot.classList.add("note-chord");
+                dot.textContent = label;
+              } else {
+                dot.classList.add("note-scale");
+                dot.textContent = note;
+              }
             }
 
             cell.appendChild(dot);
@@ -495,10 +517,12 @@
       }
     }
 
+    // Inizializzazione
+    updateChordDropdown();
     render();
   </script>
 
-  <!-- Registrazione Service Worker -->
+  <!-- Registrazione Service Worker per PWA -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
