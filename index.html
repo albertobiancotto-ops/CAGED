@@ -321,10 +321,10 @@
       "D": "C"
     };
 
-    // offset: spostamento del tasto di inizio box rispetto alla tonica sulla corda guida
+    // Mappatura aggiornata: sia E, A e D includono l'estensione a sinistra di 1 tasto (-1)
     const CAGED_OFFSETS = {
-      "E": { string: 5, offset: 0 },   // Box parte dalla Tonica
-      "A": { string: 4, offset: -1 },  // Box parte 1 tasto prima (per coprire il tasto II nella forma A)
+      "E": { string: 5, offset: -1 },  // Box parte 1 tasto prima (per coprire le note arretrate sulla 3a e 4a corda)
+      "A": { string: 4, offset: -1 },  // Box parte 1 tasto prima
       "D": { string: 3, offset: -1 },  // Box parte 1 tasto prima
       "C": { string: 4, offset: -3 },  // Box parte 3 tasti prima
       "G": { string: 5, offset: -3 }   // Box parte 3 tasti prima
@@ -498,7 +498,7 @@
     render();
   </script>
 
-  <!-- Registrazione del Service Worker per la PWA -->
+  <!-- Registrazione Service Worker -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
