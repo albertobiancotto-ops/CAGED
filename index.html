@@ -148,13 +148,16 @@
       border-color: #10b981;
     }
 
-    /* Griglia Manico */
+    /* Contenitore con scorrimento orizzontale forzato e isolato */
     .fretboard-container {
       background: var(--card-bg);
       border: 1px solid var(--border-color);
       padding: 15px 8px;
       border-radius: 10px;
-      overflow-x: auto;
+      width: 100%;
+      overflow-x: auto !important;
+      overflow-y: hidden;
+      -webkit-overflow-scrolling: touch;
     }
 
     .fretboard {
@@ -163,8 +166,10 @@
       user-select: none;
     }
 
+    /* RISOLUZIONE PROBLEMA 'A CAPO': Grid fisso a min-content con estensione rigida */
     .fretboard.full-neck {
-      display: grid;
+      display: grid !important;
+      width: max-content !important;
     }
 
     .fret-header {
@@ -172,6 +177,7 @@
       font-size: 0.75rem;
       padding-bottom: 6px;
       font-weight: bold;
+      white-space: nowrap;
     }
 
     .string-label {
@@ -190,6 +196,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      box-sizing: border-box;
     }
 
     .fret-cell.is-nut { border-right: 4px solid var(--text-color); }
@@ -414,7 +421,7 @@
       "mode_mixolydian": [0, 2, 4, 5, 7, 9, 10],
       "mode_aeolian": [0, 2, 3, 5, 7, 8, 10],
       "mode_locrian": [0, 1, 3, 5, 6, 8, 10],
-      "arp_chord": null, // Dinamico
+      "arp_chord": null,
       "arp_maj": [0, 4, 7],
       "arp_min": [0, 3, 7],
       "arp_maj7": [0, 4, 7, 11],
@@ -450,11 +457,10 @@
       "G": { string: 5, offset: -3 }
     };
 
-    // Stato Globale dell'Applicazione
     let state = {
       useFlats: false,
-      namingSystem: "INT", // INT | ITA
-      rootIndex: 0,        // 0 = C / DO
+      namingSystem: "INT",
+      rootIndex: 0,
       rootOnly: false,
       blueNote: false,
       isDark: false,
@@ -604,10 +610,16 @@
       // Render Box 4 Tasti
       renderFretboard(document.getElementById('fretboard-box'), baseFret, 5, tuningIndices, scaleNotesIndices, blueNoteIndex, chordRootIndex, chordNotesIndices);
 
-      // Render Manico Completo
+      // Render Manico Completo (Forzatura larghezza fissa e calcolata per evitare "a capo" su Chrome Android)
       const fullNeckEl = document.getElementById('fretboard-full');
-      fullNeckEl.style.gridTemplateColumns = `30px repeat(${state.neckLength}, 40px)`;
-      fullNeckEl.style.minWidth = `${30 + state.neckLength * 40}px`;
+      const fretWidth = 40;
+      const labelWidth = 30;
+      const totalWidth = labelWidth + ((state.neckLength + 1) * fretWidth);
+      
+      fullNeckEl.style.gridTemplateColumns = `${labelWidth}px repeat(${state.neckLength + 1}, ${fretWidth}px)`;
+      fullNeckEl.style.width = `${totalWidth}px`;
+      fullNeckEl.style.minWidth = `${totalWidth}px`;
+
       renderFretboard(fullNeckEl, 0, state.neckLength + 1, tuningIndices, scaleNotesIndices, blueNoteIndex, chordRootIndex, chordNotesIndices, true);
     }
 
@@ -699,3 +711,44 @@
   </script>
 </body>
 </html>
+```
+
+```javascript:Service Worker:sw.js
+const CACHE_NAME = 'caged-trainer-v8';
+const ASSETS_TO_CACHE = [
+  './',
+  './index.html',
+  './manifest.json'
+];
+
+self.addEventListener('install', (event) => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => {
+      return cache.addAll(ASSETS_TO_CACHE);
+    })
+  );
+  self.skipWaiting();
+});
+
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches.keys().then((keys) => {
+      return Promise.all(
+        keys.map((key) => {
+          if (key !== CACHE_NAME) {
+            return caches.delete(key);
+          }
+        })
+      );
+    })
+  );
+  self.clients.claim();
+});
+
+self.addEventListener('fetch', (event) => {
+  event.respondWith(
+    caches.match(event.request).then((response) => {
+      return response || fetch(event.request);
+    })
+  );
+});
