@@ -54,9 +54,9 @@ p.help{font-size:.78rem;color:var(--muted);line-height:1.4;margin-top:6px}
   border-radius:10px;display:grid;grid-template-columns:repeat(2,1fr);
   gap:10px;margin-bottom:12px
 }
-.control-group{display:flex;flex-direction:column}
+.control-group{display:flex;flex-direction:column;min-width:0}
 .control-group.full{grid-column:1/-1}
-label{font-size:.72rem;font-weight:700;margin-bottom:4px;color:var(--muted)}
+label{font-size:.72rem;font-weight:700;margin-bottom:4px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 select,button.action-btn{
   width:100%;background:var(--bg);color:var(--text);border:1px solid var(--border);
   padding:8px;border-radius:6px;font-size:.84rem;outline:none
@@ -110,8 +110,10 @@ button.action-btn.primary{background:var(--accent);color:#fff;border-color:var(-
 .stat{background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:8px;text-align:center}
 .stat b{display:block;font-size:1.1rem}.stat span{font-size:.68rem;color:var(--muted)}
 @media(max-width:600px){
-  .controls,.chord-grid{grid-template-columns:1fr}
-  .control-group.full{grid-column:auto}.toggle-bar{grid-column:auto}
+  .chord-grid{grid-template-columns:1fr}
+  .controls{gap:6px 8px;padding:8px}
+  .controls select{padding:6px;font-size:.8rem}
+  .toggle-btn{min-width:0}
   .stats{grid-template-columns:repeat(2,1fr)}
 }
 </style>
@@ -177,8 +179,8 @@ button.action-btn.primary{background:var(--accent);color:#fff;border-color:var(-
       <label for="display-select">Visualizzazione</label>
       <select id="display-select">
         <option value="notes">Nomi delle note</option>
-        <option value="degrees">Gradi della scala</option>
-        <option value="intervals">Intervalli dalla tonica</option>
+        <option value="degrees">Gradi della scala (1‑7)</option>
+        <option value="intervals">Intervalli dalla tonica (1, ♭3, ♯4…)</option>
       </select>
     </div>
 
@@ -290,8 +292,19 @@ button.action-btn.primary{background:var(--accent);color:#fff;border-color:var(-
     <div class="control-group full">
       <label for="neck-length-select">Lunghezza manico</label>
       <select id="neck-length-select">
-        <option value="12">12 tasti</option><option value="22" selected>22 tasti</option>
-        <option value="24">24 tasti</option>
+        <optgroup label="Didattica">
+          <option value="12">12 tasti</option>
+        </optgroup>
+        <optgroup label="Chitarra classica">
+          <option value="18">18 tasti</option>
+          <option value="19">19 tasti</option>
+          <option value="20">20 tasti</option>
+        </optgroup>
+        <optgroup label="Chitarra elettrica">
+          <option value="21">21 tasti</option>
+          <option value="22" selected>22 tasti</option>
+          <option value="24">24 tasti</option>
+        </optgroup>
       </select>
     </div>
     <div class="control-group full">
@@ -327,13 +340,15 @@ const LETTERS = ["C","D","E","F","G","A","B"];
 const IT_NAMES = {C:"DO",D:"RE",E:"MI",F:"FA",G:"SOL",A:"LA",B:"SI"};
 
 const INTERVAL_NAMES = {
-  0:"R",1:"♭2",2:"2",3:"♭3",4:"3",5:"4",6:"♭5",
+  0:"1",1:"♭2",2:"2",3:"♭3",4:"3",5:"4",6:"♭5",
   7:"5",8:"♭6",9:"6",10:"♭7",11:"7"
 };
 
 const SCALE_DEFS = {
   major:{label:"Scala maggiore", intervals:[0,2,4,5,7,9,11]},
-  pentatonic_major:{label:"Pentatonica maggiore", intervals:[0,2,4,7,9]}
+  minor:{label:"Scala minore (naturale)", intervals:[0,2,3,5,7,8,10]},
+  pentatonic_major:{label:"Pentatonica maggiore", intervals:[0,2,4,7,9]},
+  pentatonic_minor:{label:"Pentatonica minore", intervals:[0,3,5,7,10]}
 };
 
 const MODE_DEFS = {
@@ -457,7 +472,8 @@ function buildSpelled(rootPitch, intervals){
   const rootLetter=spellRoot(root).letter;
   const full=intervals.length===7;
   return intervals.map((interval,i)=>{
-    const step=full?i:INTERVAL_STEP[interval];
+    const dim7=!full && intervals.length===4 && intervals[2]===6 && intervals[3]===9;
+    const step=full?i:(dim7&&interval===9?6:INTERVAL_STEP[interval]);
     const letter=letterAt(rootLetter,step);
     const pitch=normalizePitch(root+interval);
     return {pitch,letter,acc:accidentalFor(letter,pitch),interval,degree:i,step};
@@ -556,7 +572,8 @@ function populateChordQuality(){
 
 function diatonicDegrees(){
   const def=currentScale();
-  const iv=(def && def.intervals.length===7)?def.intervals:SCALE_DEFS.major.intervals;
+  const iv=(def && def.intervals.length===7)?def.intervals
+    :(def && def.intervals.includes(3))?SCALE_DEFS.minor.intervals:SCALE_DEFS.major.intervals;
   const ROMAN=["I","II","III","IV","V","VI","VII"];
   return iv.map((r,i)=>{
     const third=normalizePitch(iv[(i+2)%7]-r);
@@ -603,6 +620,13 @@ function updateChordTab(){
   $("chord-form-2").value=state.caged;
 }
 
+const MAJOR_REF=[0,2,4,5,7,9,11];
+const ALT_SYMBOL={"-2":"♭♭","-1":"♭","0":"","1":"♯","2":"♯♯"};
+function degreeLabel(m){
+  const alt=m.interval-MAJOR_REF[m.step];
+  return (ALT_SYMBOL[alt]||"")+(m.step+1);
+}
+
 function noteForDisplay(pitch, scaleNotes){
   const p=normalizePitch(pitch);
   const match=scaleNotes.find(n=>n.pitch===p);
@@ -613,6 +637,7 @@ function noteForDisplay(pitch, scaleNotes){
     if(!match) return "";
     return String(match.step+1);
   }
+  if(match) return degreeLabel(match);
   return INTERVAL_NAMES[normalizePitch(p-state.root)] || "";
 }
 
@@ -628,6 +653,12 @@ function findBaseFret(cagedForm, rootPitch, tuning){
   let base=rootFret+cfg.offset;
   while(base<0) base+=12;
   return base;
+}
+
+function bluePitch(){
+  const def=currentScale();
+  const minorish=!!(def && def.intervals.includes(3));
+  return normalizePitch(state.root+(minorish?6:3));
 }
 
 function renderBox(el,base,tuning,scaleNotes,chordNotes=[],blue=false){
@@ -669,7 +700,7 @@ function renderBox(el,base,tuning,scaleNotes,chordNotes=[],blue=false){
       const inScale=scalePitches.has(pitch);
       const inChord=chordPitches.has(pitch);
       const isRoot=pitch===state.root;
-      const isBlue=blue && pitch===normalizePitch(state.root+3);
+      const isBlue=blue && pitch===bluePitch();
 
       if((inScale||inChord||isBlue) && (!state.rootOnly || isRoot)){
         const dot=document.createElement("div");
@@ -723,12 +754,14 @@ function renderFull(el,tuning,scaleNotes,chordNotes=[],blue=false){
       if(f===0) cell.classList.add("is-nut");
       const line=document.createElement("div");line.className="string-line";cell.appendChild(line);
 
-      if((scalePitches.has(pitch)||chordPitches.has(pitch)) && (!state.rootOnly || pitch===state.root)){
+      const isBlue=blue && pitch===bluePitch();
+      if((scalePitches.has(pitch)||chordPitches.has(pitch)||isBlue) && (!state.rootOnly || pitch===state.root)){
         const isRoot=pitch===state.root;
         const isChord=chordPitches.has(pitch);
         const dot=document.createElement("div");dot.className="note-dot";
         if(isRoot)dot.classList.add("note-root");
         else if(isChord)dot.classList.add("note-chord");
+        else if(isBlue && !scalePitches.has(pitch))dot.classList.add("note-blue");
         else dot.classList.add("note-scale");
         dot.textContent=noteForDisplay(pitch,scaleNotes);
         cell.appendChild(dot);
