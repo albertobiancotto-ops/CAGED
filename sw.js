@@ -1,4 +1,4 @@
-const CACHE_NAME = 'caged-trainer-v9';
+const CACHE_NAME = 'caged-trainer-v10';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
