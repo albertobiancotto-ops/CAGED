@@ -1,8 +1,8 @@
 {
   "id": "/CAGED/",
   "name": "CAGED & Scale Trainer",
-  "short_name": "CAGED Trainer",
-  "description": "App per lo studio delle scale e degli accordi sulla chitarra con metodo CAGED.",
+  "short_name": "6/X",
+  "description": "Xplore the fretboard",
   "start_url": "index.html",
   "scope": "./",
   "display": "standalone",
