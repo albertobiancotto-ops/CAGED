@@ -38,7 +38,7 @@ p.help{font-size:.78rem;color:var(--muted);line-height:1.4;margin-top:6px}
 }
 
 .tab-btn{
-  flex:1;padding:10px 4px;border:0;background:transparent;color:var(--text);
+  flex:1;min-width:90px;padding:10px 4px;border:0;background:transparent;color:var(--text);
   font-weight:700;font-size:.76rem;cursor:pointer
 }
 .tab-btn.active{background:var(--accent);color:#fff}
@@ -712,6 +712,22 @@ function diatonicDegrees(){
   });
 }
 
+function diatonicDegrees(){
+  const def=currentScale();
+  const iv=(def && def.intervals.length===7)?def.intervals
+    :(def && def.intervals.includes(3))?SCALE_DEFS.minor.intervals:SCALE_DEFS.major.intervals;
+  const ROMAN=["I","II","III","IV","V","VI","VII"];
+  return iv.map((r,i)=>{
+    const third=normalizePitch(iv[(i+2)%7]-r);
+    const fifth=normalizePitch(iv[(i+4)%7]-r);
+    let type="maj";
+    if(third===3&&fifth===7) type="min";
+    else if(third===3&&fifth===6) type="dim";
+    const roman=type==="maj"?ROMAN[i]:ROMAN[i].toLowerCase()+(type==="dim"?"°":"");
+    return {roman,offset:r,type};
+  });
+}
+
 function populateChordDropdown(){
   const el=$("chord-select"); el.innerHTML="";
   /*
@@ -917,6 +933,15 @@ function studioBoxOpts(){
 function renderScale(){
   const tuning=TUNINGS[state.tuning];
   const scaleNotes=studioScaleNotes();
+  
+  // Auto-correggi il chord se non corrisponde alla scala
+  if(state.category==="scale"){
+    if((state.item==="minor" || state.item==="pentatonic_minor") && state.chordType==="maj"){
+      state.chordType="min";
+    } else if((state.item==="major" || state.item==="pentatonic_major") && state.chordType==="min"){
+      state.chordType="maj";
+    }
+  }
 
   const chordNotes=currentChordNotes();
   const base=findBaseFret(state.caged,state.root,tuning);
@@ -1141,32 +1166,121 @@ function drawCircleOfFifths() {
   if (!canvas) return;
   
   const ctx = canvas.getContext("2d");
-  const centerX = 250, centerY = 250, radius = 180;
+  const centerX = 250, centerY = 250, radiusOuter = 180, radiusInner = 120;
   
   ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim();
   ctx.fillRect(0, 0, 500, 500);
   
-  const notes = ["C","G","D","A","E","B","F#","C#","G#","D#","A#","F"];
+  const majorNotes = ["C","G","D","A","E","B","F#","C#","G#","D#","A#","F"];
+  const relativeMinors = ["Am","Em","Bm","F#m","C#m","G#m","D#m","A#m","F#m","C#m","G#m","Dm"];
   
   ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--border').trim();
   ctx.lineWidth = 2;
+  
+  // Cerchio esterno (tonalità maggiori)
   ctx.beginPath();
-  ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+  ctx.arc(centerX, centerY, radiusOuter, 0, Math.PI * 2);
   ctx.stroke();
   
-  notes.forEach((note, i) => {
+  // Cerchio interno (tonalità minori relative)
+  ctx.beginPath();
+  ctx.arc(centerX, centerY, radiusInner, 0, Math.PI * 2);
+  ctx.stroke();
+  
+  const textColor = getComputedStyle(document.documentElement).getPropertyValue('--text').trim();
+  
+  majorNotes.forEach((note, i) => {
     const angle = (i / 12) * Math.PI * 2 - Math.PI / 2;
-    const x = centerX + radius * Math.cos(angle);
-    const y = centerY + radius * Math.sin(angle);
     
+    // Tonalità maggiore (esterna)
+    const x = centerX + radiusOuter * Math.cos(angle);
+    const y = centerY + radiusOuter * Math.sin(angle);
     const isCurrentKey = normalizePitch(PITCH_NAMES_SHARP.indexOf(note)) === state.root;
     
-    ctx.fillStyle = isCurrentKey ? '#ef4444' : getComputedStyle(document.documentElement).getPropertyValue('--text').trim();
-    ctx.font = isCurrentKey ? "bold 18px system-ui" : "16px system-ui";
+    ctx.fillStyle = isCurrentKey ? '#ef4444' : textColor;
+    ctx.font = isCurrentKey ? "bold 16px system-ui" : "14px system-ui";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.fillText(note, x, y);
+    
+    // Relativa minore (interna)
+    const xMin = centerX + radiusInner * Math.cos(angle);
+    const yMin = centerY + radiusInner * Math.sin(angle);
+    const minorRoot = normalizePitch(PITCH_NAMES_SHARP.indexOf(note.replace("#","").replace("b","")) - 3);
+    const isCurrentMinor = minorRoot === state.root;
+    
+    ctx.fillStyle = isCurrentMinor ? '#2563eb' : textColor;
+    ctx.font = isCurrentMinor ? "bold 14px system-ui" : "12px system-ui";
+    ctx.fillText(relativeMinors[i], xMin, yMin);
   });
+}
+
+
+/* Export fretboard come immagine reale */
+function getFretboardAsCanvas(boardElementId, boardInfo) {
+  const canvas = document.createElement("canvas");
+  canvas.width = 1200;
+  canvas.height = 450;
+  const ctx = canvas.getContext("2d");
+  
+  // Background
+  const bgColor = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim() || "#fff";
+  ctx.fillStyle = bgColor;
+  ctx.fillRect(0, 0, 1200, 450);
+  
+  // Titolo
+  const textColor = getComputedStyle(document.documentElement).getPropertyValue('--text').trim() || "#000";
+  ctx.fillStyle = textColor;
+  ctx.font = "bold 20px system-ui";
+  ctx.fillText(boardInfo, 20, 30);
+  
+  // Legenda
+  ctx.font = "12px system-ui";
+  ctx.fillText("Rosso: tonica | Arancio: accordo | Verde: scala | Blu: blue note", 20, 380);
+  
+  // Estrai il fretboard reale dal DOM e disegnalo
+  const board = $(boardElementId);
+  if(board){
+    const cells = board.querySelectorAll(".fret-cell");
+    const dotColor_root = "#ef4444";
+    const dotColor_chord = "#f59e0b";
+    const dotColor_scale = "#10b981";
+    const dotColor_blue = "#0284c7";
+    
+    let cellCount = 0;
+    let fretIndex = 0;
+    let stringIndex = 0;
+    
+    cells.forEach(cell => {
+      const dot = cell.querySelector(".note-dot");
+      if(dot){
+        const x = 50 + (fretIndex % 5) * 180 + 30;
+        const y = 100 + stringIndex * 50;
+        
+        let color = dotColor_scale;
+        if(dot.classList.contains("note-root")) color = dotColor_root;
+        else if(dot.classList.contains("note-chord")) color = dotColor_chord;
+        else if(dot.classList.contains("note-blue")) color = dotColor_blue;
+        
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.arc(x, y, 15, 0, Math.PI * 2);
+        ctx.fill();
+        
+        ctx.fillStyle = "#fff";
+        ctx.font = "bold 10px system-ui";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(dot.textContent, x, y);
+      }
+      
+      cellCount++;
+      fretIndex = (fretIndex + 1);
+      if(cellCount % 5 === 0) stringIndex++;
+    });
+  }
+  
+  return canvas;
 }
 
 function renderAll(){
@@ -1336,6 +1450,16 @@ $("category-select").addEventListener("change",e=>{
   populateCategoryItems();
   state.item=$("item-select").value;
   populateChordQuality();
+  
+  // Auto-switch triade: minor ↔ major
+  if(state.category==="scale"){
+    if(state.item==="minor" || state.item==="pentatonic_minor"){
+      if(state.chordType==="maj") state.chordType="min";
+    } else {
+      if(state.chordType==="min") state.chordType="maj";
+    }
+  }
+  
   renderAll();
 });
 
@@ -1486,7 +1610,7 @@ $("btn-reset").addEventListener("click",()=>{
 /* =========================================================
    METRONOMO (Web Audio)
    ========================================================= */
-const METRO_SOUNDS={click:"Click",wood:"Legno",beep:"Bip",hat:"Hi-hat",drum:"Drum"};
+const METRO_SOUNDS={click:"Click",wood:"Legno",beep:"Bip",hat:"Hi-hat"};
 const metro={
   settings:{bpm:100,beats:4,sound:"click",volume:70},
   ctx:null,master:null,bus:null,running:false,nextTime:0,beat:0,timer:null,raf:null,queue:[],taps:[]
@@ -1513,32 +1637,6 @@ function metroClick(time,accent){
   const c=metro.ctx, g=c.createGain();
   g.connect(metro.bus);
   const kind=metro.settings.sound;
-  if(kind==="drum"){
-    const tomTimes=[0,0.13,0.26];
-    const tomFreqs=[accent?1300:1100,1100,900];
-    for(let t of tomTimes){
-      const o=c.createOscillator();
-      o.type="sine";
-      o.frequency.setValueAtTime(tomFreqs.shift(),time+t);
-      o.frequency.exponentialRampToValueAtTime(100,time+t+0.05);
-      o.connect(g);
-      o.start(time+t);
-      o.stop(time+t+0.08);
-    }
-    if(accent){
-      const r=c.createOscillator();
-      r.type="sine";
-      r.frequency.value=2000;
-      r.connect(g);
-      g.gain.setValueAtTime(0.7,time+0.35);
-      g.gain.exponentialRampToValueAtTime(0.001,time+0.45);
-      r.start(time+0.35);
-      r.stop(time+0.45);
-    }
-    g.gain.setValueAtTime(accent?1:.6,time);
-    g.gain.exponentialRampToValueAtTime(0.001,time+0.4);
-    return;
-  }
   if(kind==="hat"){
     const len=0.05, buf=c.createBuffer(1,Math.ceil(c.sampleRate*len),c.sampleRate), d=buf.getChannelData(0);
     for(let i=0;i<d.length;i++) d[i]=Math.random()*2-1;
