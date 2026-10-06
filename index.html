@@ -30,10 +30,13 @@ body{
 h1{font-size:1.25rem;margin-bottom:10px;text-align:center}
 h2{font-size:1.05rem;margin-bottom:10px}
 p.help{font-size:.78rem;color:var(--muted);line-height:1.4;margin-top:6px}
+
 .tab-nav{
   display:flex;width:100%;max-width:760px;margin-bottom:12px;
-  background:var(--card);border:1px solid var(--border);border-radius:9px;overflow:hidden
+  background:var(--card);border:1px solid var(--border);border-radius:9px;overflow:hidden;
+  flex-wrap:wrap;
 }
+
 .tab-btn{
   flex:1;padding:10px 4px;border:0;background:transparent;color:var(--text);
   font-weight:700;font-size:.76rem;cursor:pointer
@@ -121,6 +124,17 @@ button.action-btn.primary{background:var(--accent);color:#fff;border-color:var(-
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
 .stat{background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:8px;text-align:center}
 .stat b{display:block;font-size:1.1rem}.stat span{font-size:.68rem;color:var(--muted)}
+
+.progression-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px}
+.progression-card{border:2px solid var(--border);border-radius:8px;padding:10px;background:var(--bg);cursor:pointer;text-align:center;font-weight:700;font-size:.85rem;transition:all .2s}
+.progression-card:hover{border-color:var(--accent);transform:translateY(-2px)}
+.progression-card.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.chord-selector{display:flex;gap:6px;margin:10px 0;flex-wrap:wrap;justify-content:center}
+.chord-btn{padding:8px 12px;border:2px solid var(--border);border-radius:6px;background:var(--bg);color:var(--text);font-weight:700;font-size:.8rem;cursor:pointer;transition:all .2s}
+.chord-btn:hover{border-color:var(--accent)}
+.chord-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.circle-container{display:flex;justify-content:center;align-items:center;min-height:400px;padding:20px}
+
 @media(max-width:600px){
   .chord-grid{grid-template-columns:1fr}
   .controls{gap:6px 8px;padding:8px}
@@ -133,20 +147,22 @@ button.action-btn.primary{background:var(--accent);color:#fff;border-color:var(-
 </head>
 
 <body>
-<h1>CAGED & Scale Guitar Trainer v2</h1>
+<h1>6/X — Xplore the fretboard</h1>
 
 <div class="tab-nav">
-  <button class="tab-btn active" data-tab="studio">Studio</button>
-  <button class="tab-btn" data-tab="accordi">Accordi</button>
+  <button class="tab-btn active" data-tab="scale">Scale</button>
   <button class="tab-btn" data-tab="manico">Manico</button>
-  <button class="tab-btn" data-tab="quiz">Quiz</button>
   <button class="tab-btn" data-tab="metronomo">Metronomo</button>
+  <button class="tab-btn" data-tab="accordi">Accordi</button>
+  <button class="tab-btn" data-tab="ch-progr">Ch.Progr.</button>
+  <button class="tab-btn" data-tab="c5th">C.5th</button>
+  <button class="tab-btn" data-tab="quiz">Quiz</button>
   <button class="tab-btn" data-tab="opzioni">Opzioni</button>
 </div>
 
 <!-- ================= STUDIO ================= -->
-<section id="studio" class="tab-content active">
-  <div class="summary" id="studio-summary">C maggiore · Scala maggiore · Forma E</div>
+<section id="scale" class="tab-content active">
+  <div class="summary" id="scale-summary">C maggiore · Scala maggiore · Forma E</div>
 
   <div class="controls">
     <div class="control-group">
@@ -205,7 +221,7 @@ button.action-btn.primary{background:var(--accent);color:#fff;border-color:var(-
   </div>
 
   <div class="fretboard-container">
-    <div class="fretboard" id="studio-board"></div>
+    <div class="fretboard" id="scale-board"></div>
     <div class="legend">
       <span><i class="i-root"></i>Tonica</span>
       <span><i class="i-chord"></i>Nota dell'accordo</span>
@@ -341,6 +357,37 @@ button.action-btn.primary{background:var(--accent);color:#fff;border-color:var(-
 </section>
 
 <!-- ================= METRONOMO ================= -->
+</section>
+
+<!-- ================= PROGRESSIONI ACCORDI ================= -->
+<section id="ch-progr" class="tab-content">
+  <div class="card">
+    <h2>Progressioni di Accordi</h2>
+    <p class="help">Seleziona una progressione e un accordo. Lo schema mostra la tonalità corrente dalla tab Scale.</p>
+  </div>
+  <div class="progression-grid" id="progression-grid"></div>
+  <div class="card" style="margin-top:12px">
+    <h2>Accordo selezionato</h2>
+    <div class="chord-selector" id="chord-selector"></div>
+  </div>
+  <div class="summary" id="progr-summary">Seleziona una progressione</div>
+  <div class="fretboard-container">
+    <div class="fretboard" id="progr-board"></div>
+  </div>
+</section>
+
+<!-- ================= CIRCOLO DELLE QUINTE ================= -->
+<section id="c5th" class="tab-content">
+  <div class="card">
+    <h2>Circolo delle Quinte</h2>
+    <p class="help">Visualizzazione interattiva del circolo delle quinte. La tonalità corrente è evidenziata.</p>
+  </div>
+  <div class="circle-container" id="circle-5th">
+    <canvas id="canvas-5th" width="500" height="500"></canvas>
+  </div>
+</section>
+
+<!-- ================= METRONOMO ================= -->
 <section id="metronomo" class="tab-content">
   <h2>Metronomo</h2>
   <div class="metro-display"><span id="metro-bpm-big">100</span><small>BPM</small></div>
@@ -434,6 +481,29 @@ const TUNINGS = {
   "Open G":[2,11,7,2,7,2],
   "Open D":[2,9,6,2,9,2]
 };
+/* =========================================================
+   PROGRESSIONI ACCORDI - 12 progressioni rock comuni
+   ========================================================= */
+const PROGRESSIONS = [
+  {name:"I-IV-V-V", intervals:[0,5,7,7]},
+  {name:"I-V-vi-IV", intervals:[0,7,9,5]},
+  {name:"vi-IV-I-V", intervals:[9,5,0,7]},
+  {name:"I-vi-IV-V", intervals:[0,9,5,7]},
+  {name:"I-IV-vi-V", intervals:[0,5,9,7]},
+  {name:"vi-ii-V", intervals:[9,2,7]},
+  {name:"I-V-vi-iii", intervals:[0,7,9,3]},
+  {name:"ii-V-I", intervals:[2,7,0]},
+  {name:"I-IV-I-V", intervals:[0,5,0,7]},
+  {name:"I-III-V-VII", intervals:[0,4,7,11]},
+  {name:"i-VII-VI-VII", intervals:[0,11,10,11]},
+  {name:"I-ii-IV-V", intervals:[0,2,5,7]}
+];
+
+let state_progr = {
+  selected_prog: 0,
+  selected_chord_idx: 0
+};
+
 
 /*
   CAGED: corda di riferimento e offset della finestra.
@@ -844,18 +914,46 @@ function studioBoxOpts(){
   return {};
 }
 
-function renderStudio(){
+function renderScale(){
   const tuning=TUNINGS[state.tuning];
   const scaleNotes=studioScaleNotes();
 
   const chordNotes=currentChordNotes();
   const base=findBaseFret(state.caged,state.root,tuning);
 
-  $("studio-summary").textContent=
+  $("scale-summary").textContent=
     `${rootNoteName()} · ${state.category==="scale"?"Scala":state.category==="mode"?"Modo":"Arpeggio"} · `+
     `${getCurrentItemLabel()} · Forma ${state.caged} · ${selectedChordLabel()}`;
 
-  renderBox($("studio-board"),base,tuning,scaleNotes,chordNotes,state.blueNote,studioBoxOpts());
+  renderBox($("scale-board"),base,tuning,scaleNotes,chordNotes,state.blueNote,studioBoxOpts());
+  
+  // Aggiungi pulsante export
+  let exportBtn = $("scale-board").parentElement.querySelector('.export-png-btn');
+  if(!exportBtn){
+    exportBtn = document.createElement("button");
+    exportBtn.className = "action-btn export-png-btn";
+    exportBtn.textContent = "📥 Salva scala come PNG";
+    exportBtn.style.marginTop = "10px";
+    exportBtn.onclick = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = 1000;
+      canvas.height = 500;
+      const ctx = canvas.getContext("2d");
+      ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim() || "#fff";
+      ctx.fillRect(0, 0, 1000, 500);
+      ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--text').trim() || "#000";
+      ctx.font = "bold 24px system-ui";
+      ctx.fillText(`${rootNoteName()} - ${getCurrentItemLabel()}`, 50, 50);
+      ctx.font = "12px system-ui";
+      ctx.fillText(`Forma ${state.caged} • ${state.display}`, 50, 80);
+
+      const link = document.createElement("a");
+      link.href = canvas.toDataURL("image/png");
+      link.download = `scala_${rootNoteName()}_${state.caged}.png`;
+      link.click();
+    };
+    $("scale-board").parentElement.appendChild(exportBtn);
+  }
 }
 
 function getCurrentItemLabel(){
@@ -902,6 +1000,173 @@ function studioScaleNotes(){
 
 function renderManico(){
   renderFull($("full-board"),TUNINGS[state.tuning],studioScaleNotes(),currentChordNotes(),state.blueNote);
+  
+  // Aggiungi pulsante export
+  let exportBtn = $("full-board").parentElement.querySelector('.export-png-btn');
+  if(!exportBtn){
+    exportBtn = document.createElement("button");
+    exportBtn.className = "action-btn export-png-btn";
+    exportBtn.textContent = "📥 Salva manico come PNG";
+    exportBtn.style.marginTop = "10px";
+    exportBtn.onclick = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = 1200;
+      canvas.height = 600;
+      const ctx = canvas.getContext("2d");
+      ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim() || "#fff";
+      ctx.fillRect(0, 0, 1200, 600);
+      ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--text').trim() || "#000";
+      ctx.font = "bold 24px system-ui";
+      ctx.fillText(`Manico Completo - ${rootNoteName()}`, 50, 50);
+
+      const link = document.createElement("a");
+      link.href = canvas.toDataURL("image/png");
+      link.download = `manico_${rootNoteName()}.png`;
+      link.click();
+    };
+    $("full-board").parentElement.appendChild(exportBtn);
+  }
+}
+
+
+/* =========================================================
+   EXPORT PNG
+   ========================================================= */
+function exportFretboardPNG(boardElementId, filename) {
+  const board = $(boardElementId);
+  if (!board) return;
+  
+  const canvas = document.createElement('canvas');
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600">
+    <style>
+      text { font-family: system-ui; font-size: 12px; fill: var(--text); }
+      line { stroke: var(--fret); }
+      circle { fill: var(--scale); }
+    </style>
+    <rect width="800" height="600" fill="var(--bg)"/>
+    <text x="400" y="30" text-anchor="middle" font-weight="bold" font-size="16">${filename}</text>
+    <text x="400" y="60" text-anchor="middle" font-size="12">${rootNoteName()} • ${state.display}</text>
+  </svg>`;
+  
+  const img = new Image();
+  img.onload = () => {
+    canvas.width = 800;
+    canvas.height = 600;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0);
+    
+    const link = document.createElement('a');
+    link.href = canvas.toDataURL('image/png');
+    link.download = filename + '.png';
+    link.click();
+  };
+  img.src = 'data:image/svg+xml;base64,' + btoa(svg);
+}
+
+function createExportButton(parentId, boardId, filename) {
+  const parent = $(parentId);
+  if (!parent) return;
+  
+  const btn = document.createElement('button');
+  btn.className = 'action-btn';
+  btn.textContent = '📥 Salva come PNG';
+  btn.style.marginTop = '10px';
+  btn.onclick = () => exportFretboardPNG(boardId, filename);
+  parent.appendChild(btn);
+}
+
+/* =========================================================
+   PROGRESSIONI
+   ========================================================= */
+function renderProgressions() {
+  const grid = $("progression-grid");
+  grid.innerHTML = "";
+  
+  PROGRESSIONS.forEach((prog, idx) => {
+    const card = document.createElement("div");
+    card.className = "progression-card" + (idx === state_progr.selected_prog ? " active" : "");
+    card.textContent = prog.name;
+    card.onclick = () => {
+      state_progr.selected_prog = idx;
+      state_progr.selected_chord_idx = 0;
+      renderProgressions();
+      renderProgressionDetail();
+    };
+    grid.appendChild(card);
+  });
+}
+
+function renderProgressionDetail() {
+  const prog = PROGRESSIONS[state_progr.selected_prog];
+  const selector = $("chord-selector");
+  selector.innerHTML = "";
+  
+  prog.intervals.forEach((offset, idx) => {
+    const root = normalizePitch(state.root + offset);
+    const btn = document.createElement("button");
+    btn.className = "chord-btn" + (idx === state_progr.selected_chord_idx ? " active" : "");
+    btn.textContent = pitchName(root);
+    btn.onclick = () => {
+      state_progr.selected_chord_idx = idx;
+      renderProgressionDetail();
+      renderProgressionBoard();
+    };
+    selector.appendChild(btn);
+  });
+  
+  renderProgressionBoard();
+}
+
+function renderProgressionBoard() {
+  const prog = PROGRESSIONS[state_progr.selected_prog];
+  const offset = prog.intervals[state_progr.selected_chord_idx];
+  const chordRoot = normalizePitch(state.root + offset);
+  
+  const chordNotes = theoreticalChord(chordRoot, CHORD_DEFS.maj.intervals);
+  const scaleNotes = currentScaleNotes();
+  const tuning = TUNINGS[state.tuning];
+  const base = findBaseFret("E", chordRoot, tuning);
+  
+  $("progr-summary").textContent = 
+    `${pitchName(chordRoot)} maggiore · ${rootNoteName()} ${PROGRESSIONS[state_progr.selected_prog].name}`;
+  
+  renderBox($("progr-board"), base, tuning, scaleNotes, chordNotes, false);
+}
+
+/* =========================================================
+   CIRCOLO DELLE QUINTE
+   ========================================================= */
+function drawCircleOfFifths() {
+  const canvas = $("canvas-5th");
+  if (!canvas) return;
+  
+  const ctx = canvas.getContext("2d");
+  const centerX = 250, centerY = 250, radius = 180;
+  
+  ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim();
+  ctx.fillRect(0, 0, 500, 500);
+  
+  const notes = ["C","G","D","A","E","B","F#","C#","G#","D#","A#","F"];
+  
+  ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--border').trim();
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+  ctx.stroke();
+  
+  notes.forEach((note, i) => {
+    const angle = (i / 12) * Math.PI * 2 - Math.PI / 2;
+    const x = centerX + radius * Math.cos(angle);
+    const y = centerY + radius * Math.sin(angle);
+    
+    const isCurrentKey = normalizePitch(PITCH_NAMES_SHARP.indexOf(note)) === state.root;
+    
+    ctx.fillStyle = isCurrentKey ? '#ef4444' : getComputedStyle(document.documentElement).getPropertyValue('--text').trim();
+    ctx.font = isCurrentKey ? "bold 18px system-ui" : "16px system-ui";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(note, x, y);
+  });
 }
 
 function renderAll(){
@@ -910,9 +1175,11 @@ function renderAll(){
   populateChordDropdown();
   updateChordTab();
   const active=document.querySelector(".tab-content.active").id;
-  if(active==="studio") renderStudio();
+  if(active==="scale") renderScale();
   else if(active==="accordi") renderChordTab();
   else if(active==="manico") renderManico();
+  else if(active==="ch-progr") {renderProgressions(); renderProgressionDetail();}
+  else if(active==="c5th") drawCircleOfFifths();
   else if(active==="quiz") renderQuiz();
   saveSettings();
   updateMetroUI();
@@ -1219,7 +1486,7 @@ $("btn-reset").addEventListener("click",()=>{
 /* =========================================================
    METRONOMO (Web Audio)
    ========================================================= */
-const METRO_SOUNDS={click:"Click",wood:"Legno",beep:"Bip",hat:"Hi-hat"};
+const METRO_SOUNDS={click:"Click",wood:"Legno",beep:"Bip",hat:"Hi-hat",drum:"Drum"};
 const metro={
   settings:{bpm:100,beats:4,sound:"click",volume:70},
   ctx:null,master:null,bus:null,running:false,nextTime:0,beat:0,timer:null,raf:null,queue:[],taps:[]
@@ -1246,6 +1513,32 @@ function metroClick(time,accent){
   const c=metro.ctx, g=c.createGain();
   g.connect(metro.bus);
   const kind=metro.settings.sound;
+  if(kind==="drum"){
+    const tomTimes=[0,0.13,0.26];
+    const tomFreqs=[accent?1300:1100,1100,900];
+    for(let t of tomTimes){
+      const o=c.createOscillator();
+      o.type="sine";
+      o.frequency.setValueAtTime(tomFreqs.shift(),time+t);
+      o.frequency.exponentialRampToValueAtTime(100,time+t+0.05);
+      o.connect(g);
+      o.start(time+t);
+      o.stop(time+t+0.08);
+    }
+    if(accent){
+      const r=c.createOscillator();
+      r.type="sine";
+      r.frequency.value=2000;
+      r.connect(g);
+      g.gain.setValueAtTime(0.7,time+0.35);
+      g.gain.exponentialRampToValueAtTime(0.001,time+0.45);
+      r.start(time+0.35);
+      r.stop(time+0.45);
+    }
+    g.gain.setValueAtTime(accent?1:.6,time);
+    g.gain.exponentialRampToValueAtTime(0.001,time+0.4);
+    return;
+  }
   if(kind==="hat"){
     const len=0.05, buf=c.createBuffer(1,Math.ceil(c.sampleRate*len),c.sampleRate), d=buf.getChannelData(0);
     for(let i=0;i<d.length;i++) d[i]=Math.random()*2-1;
@@ -1283,7 +1576,13 @@ function metroAnim(){
   const now=metro.ctx.currentTime;
   let cur=null;
   while(metro.queue.length&&metro.queue[0].t<=now) cur=metro.queue.shift();
-  if(cur) [...$("metro-beats").children].forEach((d,i)=>d.classList.toggle("on",i===cur.b));
+  if(cur) {
+    // Spegni tutti i pallini e accendi solo quello corrente
+    [...$("metro-beats").children].forEach((d,i)=>{
+      d.classList.remove("on");
+      if(i===cur.b) d.classList.add("on");
+    });
+  }
   metro.raf=requestAnimationFrame(metroAnim);
 }
 
