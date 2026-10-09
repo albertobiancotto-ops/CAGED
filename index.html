@@ -65,16 +65,16 @@ input[type=range]{width:100%}
   padding:10px;background:var(--card);border-radius:8px;margin-bottom:12px
 }
 .controls{
-  background:var(--card);border:1px solid var(--border);padding:12px;
+  background:var(--card);border:1px solid var(--border);padding:10px;
   border-radius:10px;display:grid;grid-template-columns:repeat(2,1fr);
-  gap:10px;margin-bottom:12px
+  gap:8px;margin-bottom:10px
 }
-.control-group{display:flex;flex-direction:column;min-width:0}
+.control-group{display:flex;flex-direction:column;min-width:0;gap:3px}
 .control-group.full{grid-column:1/-1}
-label{font-size:.72rem;font-weight:700;margin-bottom:4px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+label{font-size:.68rem;font-weight:700;margin-bottom:2px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 select,button.action-btn{
   width:100%;background:var(--bg);color:var(--text);border:1px solid var(--border);
-  padding:8px;border-radius:6px;font-size:.84rem;outline:none
+  padding:6px;border-radius:6px;font-size:.78rem;outline:none
 }
 button{cursor:pointer}
 button.action-btn.primary{background:var(--accent);color:#fff;border-color:var(--accent);font-weight:700}
@@ -119,7 +119,7 @@ button.action-btn.primary{background:var(--accent);color:#fff;border-color:var(-
 .chord-position.active{outline:2px solid var(--accent)}
 .chord-position strong{display:block;margin-bottom:3px}
 .badge{display:inline-block;padding:2px 6px;border-radius:999px;background:var(--border);font-size:.68rem}
-.quiz-target{text-align:center;font-size:1.25rem;font-weight:800;color:var(--accent);padding:18px 5px}
+.quiz-target{text-align:center;font-size:1.1rem;font-weight:800;color:var(--accent);padding:14px 5px}
 .quiz-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:10px}
 .stat{background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:8px;text-align:center}
@@ -134,6 +134,20 @@ button.action-btn.primary{background:var(--accent);color:#fff;border-color:var(-
 .chord-btn:hover{border-color:var(--accent)}
 .chord-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
 .circle-container{display:flex;justify-content:center;align-items:center;min-height:400px;padding:20px}
+
+.chord-list{display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:12px}
+.chord-list .card{margin:0;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px;cursor:pointer;transition:all .2s}
+.chord-list .card:hover{border-color:var(--accent);transform:translateY(-2px)}
+.chord-list strong{display:block;margin-bottom:6px;color:var(--text)}
+.chord-list small{color:var(--muted);display:block}
+#caged-forms{display:flex;gap:8px;margin:10px 0;flex-wrap:wrap;justify-content:flex-start}
+#caged-forms button{flex:1;min-width:70px;padding:10px;border:2px solid var(--border);border-radius:6px;background:var(--bg);color:var(--text);font-weight:700;cursor:pointer;transition:all .2s}
+#caged-forms button:hover{border-color:var(--accent)}
+#caged-forms button.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+.quiz-options{display:grid;grid-template-columns:1fr;gap:8px;margin:12px 0}
+.quiz-opt-btn{padding:10px;border:1px solid var(--border);background:var(--bg);color:var(--text);font-weight:700;border-radius:6px;cursor:pointer;text-align:center}
+.quiz-opt-btn:hover{border-color:var(--accent)}
 
 @media(max-width:600px){
   .chord-grid{grid-template-columns:1fr}
@@ -151,11 +165,8 @@ button.action-btn.primary{background:var(--accent);color:#fff;border-color:var(-
 
 <div class="tab-nav">
   <button class="tab-btn active" data-tab="scale">Scale</button>
-  <button class="tab-btn" data-tab="manico">Manico</button>
   <button class="tab-btn" data-tab="metronomo">Metronomo</button>
   <button class="tab-btn" data-tab="accordi">Accordi</button>
-  <button class="tab-btn" data-tab="ch-progr">Ch.Progr.</button>
-  <button class="tab-btn" data-tab="c5th">C.5th</button>
   <button class="tab-btn" data-tab="quiz">Quiz</button>
   <button class="tab-btn" data-tab="opzioni">Opzioni</button>
 </div>
@@ -184,25 +195,13 @@ button.action-btn.primary{background:var(--accent);color:#fff;border-color:var(-
       <select id="item-select"></select>
     </div>
 
-    <div class="control-group">
-      <label for="caged-select">Forma CAGED</label>
-      <select id="caged-select">
-        <option value="C">Forma C</option>
-        <option value="A">Forma A</option>
-        <option value="G">Forma G</option>
-        <option value="E" selected>Forma E</option>
-        <option value="D">Forma D</option>
-      </select>
+    <div class="control-group full">
+      <div id="caged-forms" style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap"></div>
     </div>
 
     <div class="control-group">
       <label for="chord-select">Accordo da evidenziare</label>
       <select id="chord-select"></select>
-    </div>
-
-    <div class="control-group">
-      <label for="chord-quality-select">Triadi / Quadriadi</label>
-      <select id="chord-quality-select"></select>
     </div>
 
     <div class="control-group full">
@@ -213,81 +212,35 @@ button.action-btn.primary{background:var(--accent);color:#fff;border-color:var(-
         <option value="intervals">Intervalli dalla tonica (1, ♭3, ♯4…)</option>
       </select>
     </div>
-
-    <div class="toggle-bar">
-      <button class="toggle-btn" id="btn-rootOnly">Solo toniche</button>
-      <button class="toggle-btn" id="btn-blueNote">+ Blue Note</button>
-    </div>
   </div>
 
   <div class="fretboard-container">
     <div class="fretboard" id="scale-board"></div>
-    <div class="legend">
-      <span><i class="i-root"></i>Tonica</span>
-      <span><i class="i-chord"></i>Nota dell'accordo</span>
-      <span><i class="i-scale"></i>Scala/modo</span>
-      <span><i class="i-blue"></i>Blue note</span>
-    </div>
   </div>
 </section>
 
 <!-- ================= ACCORDI ================= -->
 <section id="accordi" class="tab-content">
   <div class="card">
-    <h2>Accordi</h2>
-    <p class="help">Seleziona un accordo e una forma CAGED. Le posizioni sono visualizzate direttamente sul manico. Le diteggiature complete con numeri delle dita saranno aggiunte in un passaggio successivo.</p>
+    <h2>Accordi della scala</h2>
+    <p class="help">Elenco degli accordi presenti nella scala/modo selezionato. Clicca su un accordo per visualizzarlo.</p>
   </div>
-
-  <div class="controls">
-    <div class="control-group">
-      <label for="chord-root-2">Fondamentale</label>
-      <select id="chord-root-2"></select>
-    </div>
-    <div class="control-group">
-      <label for="chord-type-2">Tipo</label>
-      <select id="chord-type-2"></select>
-    </div>
-    <div class="control-group full">
-      <label for="chord-form-2">Forma / posizione</label>
-      <select id="chord-form-2">
-        <option value="C">Forma C</option><option value="A">Forma A</option>
-        <option value="G">Forma G</option><option value="E">Forma E</option>
-        <option value="D">Forma D</option>
-      </select>
-    </div>
-  </div>
-
-  <div class="summary" id="chord-summary-2">C = C - E - G</div>
-  <div class="fretboard-container">
-    <div class="fretboard" id="chord-board"></div>
-  </div>
-
-  <div class="card" style="margin-top:12px">
-    <h2>Forme alternative</h2>
-    <div class="chord-grid" id="alternative-forms"></div>
-  </div>
-</section>
-
-<!-- ================= MANICO ================= -->
-<section id="manico" class="tab-content">
-  <div class="card">
-    <h2>Manico completo</h2>
-    <p class="help">Vista completa delle note relative alla selezione corrente.</p>
-  </div>
-  <div class="fretboard-container">
-    <div id="full-board"></div>
-  </div>
+  
+  <div class="chord-list" id="chord-list"></div>
 </section>
 
 <!-- ================= QUIZ ================= -->
 <section id="quiz" class="tab-content">
   <div class="card">
-    <h2>Allenamento</h2>
-    <p class="help">Clicca una posizione sul manico per rispondere. “Mostra risposta” visualizza la soluzione ma non viene conteggiata come risposta corretta.</p>
-    <div class="quiz-target" id="quiz-target">Premi “Nuova sfida”</div>
+    <h2>Allenamento Casual</h2>
+    <p class="help">Un quiz casuale tra: Trova la nota, Indica le note dell'accordo, Di che scala si tratta.</p>
+    <div class="quiz-target" id="quiz-target">Premi “Nuova sfida” per iniziare</div>
+    
+    <div id="quiz-options-container" class="quiz-options" style="display:none;"></div>
+
     <div class="quiz-actions">
       <button class="action-btn primary" id="new-quiz">Nuova sfida</button>
-      <button class="action-btn" id="show-answer">Mostra risposta</button>
+      <button class="action-btn" id="show-answer">Verifica / Mostra risposta</button>
     </div>
     <div class="stats">
       <div class="stat"><b id="quiz-total">0</b><span>sfide</span></div>
@@ -296,7 +249,7 @@ button.action-btn.primary{background:var(--accent);color:#fff;border-color:var(-
       <div class="stat"><b id="quiz-rate">—</b><span>precisione</span></div>
     </div>
   </div>
-  <div class="fretboard-container">
+  <div class="fretboard-container" id="quiz-board-container">
     <div class="fretboard" id="quiz-board"></div>
   </div>
 </section>
@@ -357,37 +310,6 @@ button.action-btn.primary{background:var(--accent);color:#fff;border-color:var(-
 </section>
 
 <!-- ================= METRONOMO ================= -->
-</section>
-
-<!-- ================= PROGRESSIONI ACCORDI ================= -->
-<section id="ch-progr" class="tab-content">
-  <div class="card">
-    <h2>Progressioni di Accordi</h2>
-    <p class="help">Seleziona una progressione e un accordo. Lo schema mostra la tonalità corrente dalla tab Scale.</p>
-  </div>
-  <div class="progression-grid" id="progression-grid"></div>
-  <div class="card" style="margin-top:12px">
-    <h2>Accordo selezionato</h2>
-    <div class="chord-selector" id="chord-selector"></div>
-  </div>
-  <div class="summary" id="progr-summary">Seleziona una progressione</div>
-  <div class="fretboard-container">
-    <div class="fretboard" id="progr-board"></div>
-  </div>
-</section>
-
-<!-- ================= CIRCOLO DELLE QUINTE ================= -->
-<section id="c5th" class="tab-content">
-  <div class="card">
-    <h2>Circolo delle Quinte</h2>
-    <p class="help">Visualizzazione interattiva del circolo delle quinte. La tonalità corrente è evidenziata.</p>
-  </div>
-  <div class="circle-container" id="circle-5th">
-    <canvas id="canvas-5th" width="500" height="500"></canvas>
-  </div>
-</section>
-
-<!-- ================= METRONOMO ================= -->
 <section id="metronomo" class="tab-content">
   <h2>Metronomo</h2>
   <div class="metro-display"><span id="metro-bpm-big">100</span><small>BPM</small></div>
@@ -420,7 +342,7 @@ button.action-btn.primary{background:var(--accent);color:#fff;border-color:var(-
       <button class="action-btn primary" id="metro-toggle">▶ Avvia</button>
     </div>
   </div>
-  <p class="help">Il metronomo continua a suonare anche se passi alle altre schede: un pulsante in basso a destra permette di fermarlo. Su telefono, a schermo spento o con l'app in secondo piano il suono può interrompersi.</p>
+  <p class="help">Il metronomo continua a suonare anche se passi alle altre schede: un pulsante in basso a destra permette di fermarlo.</p>
 </section>
 
 <button id="mini-metro" type="button">■ Ferma</button>
@@ -431,8 +353,6 @@ button.action-btn.primary{background:var(--accent);color:#fff;border-color:var(-
 
 /* =========================================================
    MOTORE MUSICALE
-   Pitch class: C=0, C#/Db=1 ... B=11.
-   Il nome teorico viene calcolato separatamente dal pitch.
    ========================================================= */
 
 const PITCH_NAMES_SHARP = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"];
@@ -451,7 +371,9 @@ const SCALE_DEFS = {
   major:{label:"Scala maggiore", intervals:[0,2,4,5,7,9,11]},
   minor:{label:"Scala minore (naturale)", intervals:[0,2,3,5,7,8,10]},
   pentatonic_major:{label:"Pentatonica maggiore", intervals:[0,2,4,7,9]},
-  pentatonic_minor:{label:"Pentatonica minore", intervals:[0,3,5,7,10]}
+  pentatonic_minor:{label:"Pentatonica minore", intervals:[0,3,5,7,10]},
+  blues_major:{label:"Scala blues maggiore", intervals:[0,3,5,6,7,10]},
+  blues_minor:{label:"Scala blues minore", intervals:[0,3,5,6,7,8,10]}
 };
 
 const MODE_DEFS = {
@@ -481,34 +403,7 @@ const TUNINGS = {
   "Open G":[2,11,7,2,7,2],
   "Open D":[2,9,6,2,9,2]
 };
-/* =========================================================
-   PROGRESSIONI ACCORDI - 12 progressioni rock comuni
-   ========================================================= */
-const PROGRESSIONS = [
-  {name:"I-IV-V-V", intervals:[0,5,7,7]},
-  {name:"I-V-vi-IV", intervals:[0,7,9,5]},
-  {name:"vi-IV-I-V", intervals:[9,5,0,7]},
-  {name:"I-vi-IV-V", intervals:[0,9,5,7]},
-  {name:"I-IV-vi-V", intervals:[0,5,9,7]},
-  {name:"vi-ii-V", intervals:[9,2,7]},
-  {name:"I-V-vi-iii", intervals:[0,7,9,3]},
-  {name:"ii-V-I", intervals:[2,7,0]},
-  {name:"I-IV-I-V", intervals:[0,5,0,7]},
-  {name:"I-III-V-VII", intervals:[0,4,7,11]},
-  {name:"i-VII-VI-VII", intervals:[0,11,10,11]},
-  {name:"I-ii-IV-V", intervals:[0,2,5,7]}
-];
 
-let state_progr = {
-  selected_prog: 0,
-  selected_chord_idx: 0
-};
-
-
-/*
-  CAGED: corda di riferimento e offset della finestra.
-  La finestra Studio è SEMPRE di 5 tasti.
-*/
 const CAGED = {
   E:{string:5,offset:-1},
   A:{string:4,offset:-1},
@@ -531,8 +426,7 @@ const state = {
   rootOnly:false,
   blueNote:false,
   display:"notes",
-  dark:false,
-  quiz:{target:null,total:0,answered:0,correct:0,answeredCurrent:false,revealed:false,selected:null}
+  dark:false
 };
 
 function normalizePitch(p){ return ((p%12)+12)%12; }
@@ -540,9 +434,7 @@ function normalizePitch(p){ return ((p%12)+12)%12; }
 function preferredAccidental(rootPitch){
   if(state.accidental==="sharp") return "sharp";
   if(state.accidental==="flat") return "flat";
-
-  /* Tonalità comuni: scegliamo automaticamente l'ortografia più naturale. */
-  const flatRoots = new Set([1,3,5,8,10]); // Db Eb F? Ab Bb; F viene gestito bene con Bb
+  const flatRoots = new Set([1,3,5,8,10]);
   return flatRoots.has(rootPitch) ? "flat" : "sharp";
 }
 
@@ -558,12 +450,6 @@ function pitchName(pitch){
   return n;
 }
 
-/*
-  Spelling diatonico.
-  rootLetter = letter della tonica;
-  scaleLetters definisce la sequenza C-D-E-F-G-A-B;
-  il pitch desiderato determina l'accidentale necessario.
-*/
 function letterAt(rootLetter, degree){
   const i=LETTERS.indexOf(rootLetter);
   return LETTERS[(i+degree)%7];
@@ -576,14 +462,11 @@ function accidentalFor(letter, desiredPitch){
   if(diff===2) return "##";
   if(diff===11) return "b";
   if(diff===10) return "bb";
-
-  /* fallback cromatico */
   const sharp=normalizePitch(desiredPitch-LETTER_PITCH[letter]);
   if(sharp<=6) return "#".repeat(sharp);
   return "b".repeat(12-sharp);
 }
 
-/* Grado (0-6) di un intervallo quando la sequenza NON ha 7 note (pentatoniche, arpeggi, accordi). */
 const INTERVAL_STEP={0:0,1:1,2:1,3:2,4:2,5:3,6:4,7:4,8:5,9:5,10:6,11:6};
 
 function spellRoot(pitch){
@@ -649,16 +532,16 @@ function selectedChordLabel(){
 const $=id=>document.getElementById(id);
 
 function fillRootSelects(){
-  ["root-select","chord-root-2"].forEach(id=>{
-    const el=$(id); el.innerHTML="";
-    for(let p=0;p<12;p++){
-      const opt=document.createElement("option");
-      opt.value=p;
-      opt.textContent=pitchName(p);
-      el.appendChild(opt);
-    }
-    el.value=state.root;
-  });
+  const el=$("root-select");
+  if(!el) return;
+  el.innerHTML="";
+  for(let p=0;p<12;p++){
+    const opt=document.createElement("option");
+    opt.value=p;
+    opt.textContent=pitchName(p);
+    el.appendChild(opt);
+  }
+  el.value=state.root;
 }
 
 function populateCategoryItems(){
@@ -681,36 +564,7 @@ function populateCategoryItems(){
   else state.item=item.value;
 }
 
-function populateChordQuality(){
-  const el=$("chord-quality-select"); el.innerHTML="";
-  const list=state.category==="arpeggio"
-    ? ["maj","min","maj7","dom7","min7","m7b5"]
-    : ["maj","min","dim","maj7","dom7","min7","m7b5"];
-
-  list.forEach(key=>{
-    const o=document.createElement("option");
-    o.value=key;o.textContent=CHORD_DEFS[key].label;
-    el.appendChild(o);
-  });
-  if(!list.includes(state.chordType)) state.chordType="maj";
-  el.value=state.chordType;
-}
-
-function diatonicDegrees(){
-  const def=currentScale();
-  const iv=(def && def.intervals.length===7)?def.intervals
-    :(def && def.intervals.includes(3))?SCALE_DEFS.minor.intervals:SCALE_DEFS.major.intervals;
-  const ROMAN=["I","II","III","IV","V","VI","VII"];
-  return iv.map((r,i)=>{
-    const third=normalizePitch(iv[(i+2)%7]-r);
-    const fifth=normalizePitch(iv[(i+4)%7]-r);
-    let type="maj";
-    if(third===3&&fifth===7) type="min";
-    else if(third===3&&fifth===6) type="dim";
-    const roman=type==="maj"?ROMAN[i]:ROMAN[i].toLowerCase()+(type==="dim"?"°":"");
-    return {roman,offset:r,type};
-  });
-}
+// function populateChordQuality(){ ... }
 
 function diatonicDegrees(){
   const def=currentScale();
@@ -730,14 +584,7 @@ function diatonicDegrees(){
 
 function populateChordDropdown(){
   const el=$("chord-select"); el.innerHTML="";
-  /*
-    I numeri romani identificano il grado, ma il nome dell'accordo
-    deve essere sempre espresso come fondamentale + qualità.
-    Esempio in C maggiore:
-    I: C, ii: Dm, iii: Em, IV: F, V: G, vi: Am, vii°: B°.
-  */
   const degrees=diatonicDegrees();
-
   degrees.forEach(({roman,offset,type})=>{
     const root=normalizePitch(state.root+offset);
     const o=document.createElement("option");
@@ -747,19 +594,6 @@ function populateChordDropdown(){
   });
   if(![...el.options].some(o=>o.value===String(state.selectedChordOffset))) state.selectedChordOffset=0;
   el.value=String(state.selectedChordOffset);
-}
-
-function updateChordTab(){
-  const root=$("chord-root-2");
-  root.value=state.root;
-  const type=$("chord-type-2");
-  type.innerHTML="";
-  Object.entries(CHORD_DEFS).forEach(([key,d])=>{
-    const o=document.createElement("option");
-    o.value=key;o.textContent=d.label;type.appendChild(o);
-  });
-  type.value=state.chordType;
-  $("chord-form-2").value=state.caged;
 }
 
 const MAJOR_REF=[0,2,4,5,7,9,11];
@@ -803,8 +637,6 @@ function bluePitch(){
   return normalizePitch(state.root+(minorish?6:3));
 }
 
-/* opts.start: sposta la finestra di N tasti (es. -1 = parte un tasto prima di base).
-   opts.hideDup: elenco {s,col}: nasconde la nota se è identica a quella sul tasto iniziale della corda adiacente più sottile (es. sol → si). */
 function renderBox(el,base,tuning,scaleNotes,chordNotes=[],blue=false,opts={}){
   el.innerHTML="";
   el.style.gridTemplateColumns="42px repeat(5,64px)";
@@ -856,8 +688,7 @@ function renderBox(el,base,tuning,scaleNotes,chordNotes=[],blue=false,opts={}){
         else if(isBlue) dot.classList.add("note-blue");
         else dot.classList.add("note-scale");
 
-        const scaleForDisplay=scaleNotes;
-        dot.textContent=noteForDisplay(pitch,scaleForDisplay);
+        dot.textContent=noteForDisplay(pitch,scaleNotes);
         cell.appendChild(dot);
       }
       el.appendChild(cell);
@@ -865,62 +696,6 @@ function renderBox(el,base,tuning,scaleNotes,chordNotes=[],blue=false,opts={}){
   }
 }
 
-function renderFull(el,tuning,scaleNotes,chordNotes=[],blue=false){
-  el.innerHTML="";
-  const total=state.neckLength;
-  const width=42+total*50;
-  const board=document.createElement("div");
-  board.className="fretboard";
-  board.style.gridTemplateColumns=`42px repeat(${total+1},50px)`;
-  board.style.width=`${width}px`;
-
-  board.appendChild(document.createElement("div"));
-  for(let f=0;f<=total;f++){
-    const h=document.createElement("div");
-    h.className="fret-header";
-    h.textContent=f;
-    board.appendChild(h);
-  }
-
-  const scalePitches=new Set(scaleNotes.map(n=>n.pitch));
-  const chordPitches=new Set(chordNotes.map(n=>n.pitch));
-
-  for(let s=0;s<6;s++){
-    const open=tuning[s];
-    const label=document.createElement("div");
-    label.className="string-label";label.textContent=pitchName(open);
-    board.appendChild(label);
-
-    for(let f=0;f<=total;f++){
-      const pitch=normalizePitch(open+f);
-      const cell=document.createElement("div");
-      cell.className=`fret-cell s${s+1}`;
-      cell.dataset.stringIndex=s;
-      cell.dataset.fret=f;
-      if(f===0) cell.classList.add("is-nut");
-      const line=document.createElement("div");line.className="string-line";cell.appendChild(line);
-
-      const isBlue=blue && pitch===bluePitch();
-      if((scalePitches.has(pitch)||chordPitches.has(pitch)||isBlue) && (!state.rootOnly || pitch===state.root)){
-        const isRoot=pitch===state.root;
-        const isChord=chordPitches.has(pitch);
-        const dot=document.createElement("div");dot.className="note-dot";
-        if(isRoot)dot.classList.add("note-root");
-        else if(isChord)dot.classList.add("note-chord");
-        else if(isBlue && !scalePitches.has(pitch))dot.classList.add("note-blue");
-        else dot.classList.add("note-scale");
-        dot.textContent=noteForDisplay(pitch,scaleNotes);
-        cell.appendChild(dot);
-      }
-      board.appendChild(cell);
-    }
-  }
-  el.appendChild(board);
-}
-
-/* Aggiustamenti delle forme G e C per scala maggiore, ionio e pentatonica maggiore.
-   G: la finestra parte un tasto prima (la 7ª va sulla corda di sol, la 3ª resta sulla corda di si).
-   C: la 7ª sulla corda di sol è già sulla corda di si, quindi si toglie. */
 function studioBoxOpts(){
   const simple=(state.category==="scale"&&(state.item==="major"||state.item==="pentatonic_major"))
     ||(state.category==="mode"&&state.item==="ionian");
@@ -934,7 +709,6 @@ function renderScale(){
   const tuning=TUNINGS[state.tuning];
   const scaleNotes=studioScaleNotes();
   
-  // Auto-correggi il chord se non corrisponde alla scala
   if(state.category==="scale"){
     if((state.item==="minor" || state.item==="pentatonic_minor") && state.chordType==="maj"){
       state.chordType="min";
@@ -951,34 +725,7 @@ function renderScale(){
     `${getCurrentItemLabel()} · Forma ${state.caged} · ${selectedChordLabel()}`;
 
   renderBox($("scale-board"),base,tuning,scaleNotes,chordNotes,state.blueNote,studioBoxOpts());
-  
-  // Aggiungi pulsante export
-  let exportBtn = $("scale-board").parentElement.querySelector('.export-png-btn');
-  if(!exportBtn){
-    exportBtn = document.createElement("button");
-    exportBtn.className = "action-btn export-png-btn";
-    exportBtn.textContent = "📥 Salva scala come PNG";
-    exportBtn.style.marginTop = "10px";
-    exportBtn.onclick = () => {
-      const canvas = document.createElement("canvas");
-      canvas.width = 1000;
-      canvas.height = 500;
-      const ctx = canvas.getContext("2d");
-      ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim() || "#fff";
-      ctx.fillRect(0, 0, 1000, 500);
-      ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--text').trim() || "#000";
-      ctx.font = "bold 24px system-ui";
-      ctx.fillText(`${rootNoteName()} - ${getCurrentItemLabel()}`, 50, 50);
-      ctx.font = "12px system-ui";
-      ctx.fillText(`Forma ${state.caged} • ${state.display}`, 50, 80);
-
-      const link = document.createElement("a");
-      link.href = canvas.toDataURL("image/png");
-      link.download = `scala_${rootNoteName()}_${state.caged}.png`;
-      link.click();
-    };
-    $("scale-board").parentElement.appendChild(exportBtn);
-  }
+  renderCAGEDSchemas();
 }
 
 function getCurrentItemLabel(){
@@ -986,31 +733,6 @@ function getCurrentItemLabel(){
   if(state.category==="mode") return MODE_DEFS[state.item]?.label||"";
   if(state.item==="arp_chord") return "Arpeggio accordo";
   return CHORD_DEFS[state.item]?.label||"";
-}
-
-function renderChordTab(){
-  const root=state.root;
-  const def=CHORD_DEFS[state.chordType];
-  const notes=theoreticalChord(root,def.intervals);
-  const base=findBaseFret(state.caged,root,TUNINGS[state.tuning]);
-
-  $("chord-summary-2").textContent=
-    `${pitchName(root)}${def.suffix} = ${notes.map(displayTheoretical).join(" - ")} · Forma ${state.caged}`;
-
-  renderBox($("chord-board"),base,TUNINGS[state.tuning],notes,notes,false);
-
-  const alt=$("alternative-forms");alt.innerHTML="";
-  ["C","A","G","E","D"].forEach(form=>{
-    const b=document.createElement("button");
-    b.className="chord-position"+(form===state.caged?" active":"");
-    b.innerHTML=`<strong>Forma ${form}</strong><span class="badge">posizione CAGED</span>`;
-    b.onclick=()=>{
-      state.caged=form;
-      $("chord-form-2").value=form;
-      renderAll();
-    };
-    alt.appendChild(b);
-  });
 }
 
 function studioScaleNotes(){
@@ -1023,408 +745,292 @@ function studioScaleNotes(){
   return currentScaleNotes();
 }
 
-function renderManico(){
-  renderFull($("full-board"),TUNINGS[state.tuning],studioScaleNotes(),currentChordNotes(),state.blueNote);
+function renderChordList(){
+  const container = $("chord-list");
+  if(!container) return;
+  container.innerHTML = "";
   
-  // Aggiungi pulsante export
-  let exportBtn = $("full-board").parentElement.querySelector('.export-png-btn');
-  if(!exportBtn){
-    exportBtn = document.createElement("button");
-    exportBtn.className = "action-btn export-png-btn";
-    exportBtn.textContent = "📥 Salva manico come PNG";
-    exportBtn.style.marginTop = "10px";
-    exportBtn.onclick = () => {
-      const canvas = document.createElement("canvas");
-      canvas.width = 1200;
-      canvas.height = 600;
-      const ctx = canvas.getContext("2d");
-      ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim() || "#fff";
-      ctx.fillRect(0, 0, 1200, 600);
-      ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--text').trim() || "#000";
-      ctx.font = "bold 24px system-ui";
-      ctx.fillText(`Manico Completo - ${rootNoteName()}`, 50, 50);
-
-      const link = document.createElement("a");
-      link.href = canvas.toDataURL("image/png");
-      link.download = `manico_${rootNoteName()}.png`;
-      link.click();
-    };
-    $("full-board").parentElement.appendChild(exportBtn);
-  }
-}
-
-
-/* =========================================================
-   EXPORT PNG
-   ========================================================= */
-function exportFretboardPNG(boardElementId, filename) {
-  const board = $(boardElementId);
-  if (!board) return;
+  const degrees = diatonicDegrees();
   
-  const canvas = document.createElement('canvas');
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600">
-    <style>
-      text { font-family: system-ui; font-size: 12px; fill: var(--text); }
-      line { stroke: var(--fret); }
-      circle { fill: var(--scale); }
-    </style>
-    <rect width="800" height="600" fill="var(--bg)"/>
-    <text x="400" y="30" text-anchor="middle" font-weight="bold" font-size="16">${filename}</text>
-    <text x="400" y="60" text-anchor="middle" font-size="12">${rootNoteName()} • ${state.display}</text>
-  </svg>`;
-  
-  const img = new Image();
-  img.onload = () => {
-    canvas.width = 800;
-    canvas.height = 600;
-    const ctx = canvas.getContext('2d');
-    ctx.drawImage(img, 0, 0);
-    
-    const link = document.createElement('a');
-    link.href = canvas.toDataURL('image/png');
-    link.download = filename + '.png';
-    link.click();
-  };
-  img.src = 'data:image/svg+xml;base64,' + btoa(svg);
-}
-
-function createExportButton(parentId, boardId, filename) {
-  const parent = $(parentId);
-  if (!parent) return;
-  
-  const btn = document.createElement('button');
-  btn.className = 'action-btn';
-  btn.textContent = '📥 Salva come PNG';
-  btn.style.marginTop = '10px';
-  btn.onclick = () => exportFretboardPNG(boardId, filename);
-  parent.appendChild(btn);
-}
-
-/* =========================================================
-   PROGRESSIONI
-   ========================================================= */
-function renderProgressions() {
-  const grid = $("progression-grid");
-  grid.innerHTML = "";
-  
-  PROGRESSIONS.forEach((prog, idx) => {
-    const card = document.createElement("div");
-    card.className = "progression-card" + (idx === state_progr.selected_prog ? " active" : "");
-    card.textContent = prog.name;
-    card.onclick = () => {
-      state_progr.selected_prog = idx;
-      state_progr.selected_chord_idx = 0;
-      renderProgressions();
-      renderProgressionDetail();
-    };
-    grid.appendChild(card);
-  });
-}
-
-function renderProgressionDetail() {
-  const prog = PROGRESSIONS[state_progr.selected_prog];
-  const selector = $("chord-selector");
-  selector.innerHTML = "";
-  
-  prog.intervals.forEach((offset, idx) => {
+  degrees.forEach(({roman, offset, type}) => {
     const root = normalizePitch(state.root + offset);
-    const btn = document.createElement("button");
-    btn.className = "chord-btn" + (idx === state_progr.selected_chord_idx ? " active" : "");
-    btn.textContent = pitchName(root);
-    btn.onclick = () => {
-      state_progr.selected_chord_idx = idx;
-      renderProgressionDetail();
-      renderProgressionBoard();
-    };
-    selector.appendChild(btn);
-  });
-  
-  renderProgressionBoard();
-}
-
-function renderProgressionBoard() {
-  const prog = PROGRESSIONS[state_progr.selected_prog];
-  const offset = prog.intervals[state_progr.selected_chord_idx];
-  const chordRoot = normalizePitch(state.root + offset);
-  
-  const chordNotes = theoreticalChord(chordRoot, CHORD_DEFS.maj.intervals);
-  const scaleNotes = currentScaleNotes();
-  const tuning = TUNINGS[state.tuning];
-  const base = findBaseFret("E", chordRoot, tuning);
-  
-  $("progr-summary").textContent = 
-    `${pitchName(chordRoot)} maggiore · ${rootNoteName()} ${PROGRESSIONS[state_progr.selected_prog].name}`;
-  
-  renderBox($("progr-board"), base, tuning, scaleNotes, chordNotes, false);
-}
-
-/* =========================================================
-   CIRCOLO DELLE QUINTE
-   ========================================================= */
-function drawCircleOfFifths() {
-  const canvas = $("canvas-5th");
-  if (!canvas) return;
-  
-  const ctx = canvas.getContext("2d");
-  const centerX = 250, centerY = 250, radiusOuter = 180, radiusInner = 120;
-  
-  ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim();
-  ctx.fillRect(0, 0, 500, 500);
-  
-  const majorNotes = ["C","G","D","A","E","B","F#","C#","G#","D#","A#","F"];
-  const relativeMinors = ["Am","Em","Bm","F#m","C#m","G#m","D#m","A#m","F#m","C#m","G#m","Dm"];
-  
-  ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--border').trim();
-  ctx.lineWidth = 2;
-  
-  // Cerchio esterno (tonalità maggiori)
-  ctx.beginPath();
-  ctx.arc(centerX, centerY, radiusOuter, 0, Math.PI * 2);
-  ctx.stroke();
-  
-  // Cerchio interno (tonalità minori relative)
-  ctx.beginPath();
-  ctx.arc(centerX, centerY, radiusInner, 0, Math.PI * 2);
-  ctx.stroke();
-  
-  const textColor = getComputedStyle(document.documentElement).getPropertyValue('--text').trim();
-  
-  majorNotes.forEach((note, i) => {
-    const angle = (i / 12) * Math.PI * 2 - Math.PI / 2;
+    const chordDef = CHORD_DEFS[type];
+    const chordNotes = theoreticalChord(root, chordDef.intervals);
+    const noteNames = chordNotes.map(n => displayTheoretical(n)).join("-");
     
-    // Tonalità maggiore (esterna)
-    const x = centerX + radiusOuter * Math.cos(angle);
-    const y = centerY + radiusOuter * Math.sin(angle);
-    const isCurrentKey = normalizePitch(PITCH_NAMES_SHARP.indexOf(note)) === state.root;
-    
-    ctx.fillStyle = isCurrentKey ? '#ef4444' : textColor;
-    ctx.font = isCurrentKey ? "bold 16px system-ui" : "14px system-ui";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText(note, x, y);
-    
-    // Relativa minore (interna)
-    const xMin = centerX + radiusInner * Math.cos(angle);
-    const yMin = centerY + radiusInner * Math.sin(angle);
-    const minorRoot = normalizePitch(PITCH_NAMES_SHARP.indexOf(note.replace("#","").replace("b","")) - 3);
-    const isCurrentMinor = minorRoot === state.root;
-    
-    ctx.fillStyle = isCurrentMinor ? '#2563eb' : textColor;
-    ctx.font = isCurrentMinor ? "bold 14px system-ui" : "12px system-ui";
-    ctx.fillText(relativeMinors[i], xMin, yMin);
-  });
-}
-
-
-/* Export fretboard come immagine reale */
-function getFretboardAsCanvas(boardElementId, boardInfo) {
-  const canvas = document.createElement("canvas");
-  canvas.width = 1200;
-  canvas.height = 450;
-  const ctx = canvas.getContext("2d");
-  
-  // Background
-  const bgColor = getComputedStyle(document.documentElement).getPropertyValue('--bg').trim() || "#fff";
-  ctx.fillStyle = bgColor;
-  ctx.fillRect(0, 0, 1200, 450);
-  
-  // Titolo
-  const textColor = getComputedStyle(document.documentElement).getPropertyValue('--text').trim() || "#000";
-  ctx.fillStyle = textColor;
-  ctx.font = "bold 20px system-ui";
-  ctx.fillText(boardInfo, 20, 30);
-  
-  // Legenda
-  ctx.font = "12px system-ui";
-  ctx.fillText("Rosso: tonica | Arancio: accordo | Verde: scala | Blu: blue note", 20, 380);
-  
-  // Estrai il fretboard reale dal DOM e disegnalo
-  const board = $(boardElementId);
-  if(board){
-    const cells = board.querySelectorAll(".fret-cell");
-    const dotColor_root = "#ef4444";
-    const dotColor_chord = "#f59e0b";
-    const dotColor_scale = "#10b981";
-    const dotColor_blue = "#0284c7";
-    
-    let cellCount = 0;
-    let fretIndex = 0;
-    let stringIndex = 0;
-    
-    cells.forEach(cell => {
-      const dot = cell.querySelector(".note-dot");
-      if(dot){
-        const x = 50 + (fretIndex % 5) * 180 + 30;
-        const y = 100 + stringIndex * 50;
-        
-        let color = dotColor_scale;
-        if(dot.classList.contains("note-root")) color = dotColor_root;
-        else if(dot.classList.contains("note-chord")) color = dotColor_chord;
-        else if(dot.classList.contains("note-blue")) color = dotColor_blue;
-        
-        ctx.fillStyle = color;
-        ctx.beginPath();
-        ctx.arc(x, y, 15, 0, Math.PI * 2);
-        ctx.fill();
-        
-        ctx.fillStyle = "#fff";
-        ctx.font = "bold 10px system-ui";
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.fillText(dot.textContent, x, y);
-      }
-      
-      cellCount++;
-      fretIndex = (fretIndex + 1);
-      if(cellCount % 5 === 0) stringIndex++;
+    const degreesArray = chordNotes.map((n) => {
+      const interval = n.interval;
+      if(interval===0) return "1";
+      if(interval===2) return "2";
+      if(interval===3) return "3b";
+      if(interval===4) return "3";
+      if(interval===5) return "4";
+      if(interval===6) return "5b";
+      if(interval===7) return "5";
+      if(interval===8) return "6b";
+      if(interval===9) return "6";
+      if(interval===10) return "7b";
+      return "7";
     });
-  }
+    const degreesStr = degreesArray.join("-");
+    
+    const card = document.createElement("div");
+    card.className = "card";
+    card.innerHTML = `<strong>${roman}: ${pitchName(root)}${chordDef.suffix}</strong><br><small>${noteNames} (${degreesStr})</small>`;
+    container.appendChild(card);
+  });
+}
+
+function renderCAGEDSchemas(){
+  const container = $("caged-forms");
+  if(!container) return;
+  container.innerHTML = "";
   
-  return canvas;
+  ["C","A","G","E","D"].forEach(form => {
+    const btn = document.createElement("button");
+    btn.className = "tab-btn" + (form === state.caged ? " active" : "");
+    btn.style.cssText = "min-width: auto; padding: 8px 12px; margin: 4px;";
+    btn.textContent = form;
+    btn.onclick = () => {
+      state.caged = form;
+      renderAll();
+    };
+    container.appendChild(btn);
+  });
 }
 
 function renderAll(){
   fillRootSelects();
-  populateChordQuality();
   populateChordDropdown();
-  updateChordTab();
   const active=document.querySelector(".tab-content.active").id;
   if(active==="scale") renderScale();
-  else if(active==="accordi") renderChordTab();
-  else if(active==="manico") renderManico();
-  else if(active==="ch-progr") {renderProgressions(); renderProgressionDetail();}
-  else if(active==="c5th") drawCircleOfFifths();
-  else if(active==="quiz") renderQuiz();
+  else if(active==="accordi") renderChordList();
+  else if(active==="quiz") renderQuizBoard();
   saveSettings();
   updateMetroUI();
 }
 
-function renderQuiz(){
-  const tuning=TUNINGS[state.tuning];
-  const q=state.quiz.target;
+/* =========================================================
+   QUIZ CASUALI (A, B, C)
+   ========================================================= */
 
-  if(!q){
-    renderBox($("quiz-board"),0,tuning,[],[],false);
+let quizState = {
+  type: null,
+  target: null,
+  userPitches: new Set(),
+  options: [],
+  selectedOption: null,
+  answeredCurrent: false,
+  total: 0,
+  answered: 0,
+  correct: 0
+};
+
+function newQuiz(){
+  const types = ['find-note', 'chord-notes', 'identify-scale'];
+  quizState.type = types[Math.floor(Math.random() * types.length)];
+  quizState.userPitches.clear();
+  quizState.options = [];
+  quizState.selectedOption = null;
+  quizState.answeredCurrent = false;
+
+  $("quiz-options-container").style.display = "none";
+  $("quiz-options-container").innerHTML = "";
+
+  if(quizState.type === 'find-note'){
+    setupQuizFindNote();
+  } else if(quizState.type === 'chord-notes'){
+    setupQuizChordNotes();
+  } else if(quizState.type === 'identify-scale'){
+    setupQuizIdentifyScale();
+  }
+
+  quizState.total++;
+  updateQuizStats();
+  renderQuizBoard();
+}
+
+// Tipo A: Trova la nota
+function setupQuizFindNote(){
+  const targetPitch = Math.floor(Math.random() * 12);
+  quizState.target = { pitch: targetPitch, name: pitchName(targetPitch) };
+  $("quiz-target").textContent = `Trova la nota: ${quizState.target.name}`;
+}
+
+// Tipo B: Indica le note dell'accordo (Tonica, Terza, Quinta)
+function setupQuizChordNotes(){
+  const root = Math.floor(Math.random() * 12);
+  const isMinor = Math.random() < 0.5;
+  const thirdOffset = isMinor ? 3 : 4;
+  const chordName = pitchName(root) + (isMinor ? "m" : "");
+
+  quizState.target = {
+    root: root,
+    third: normalizePitch(root + thirdOffset),
+    fifth: normalizePitch(root + 7),
+    name: chordName
+  };
+  $("quiz-target").textContent = `Indica le note dell'accordo: ${chordName} (Tonica, Terza, Quinta)`;
+}
+
+// Tipo C: Di che scala si tratta
+function setupQuizIdentifyScale(){
+  const root = Math.floor(Math.random() * 12);
+  const keys = Object.keys(SCALE_DEFS);
+  const correctKey = keys[Math.floor(Math.random() * keys.length)];
+  const correctDef = SCALE_DEFS[correctKey];
+
+  let wrongKeys = keys.filter(k => k !== correctKey);
+  wrongKeys.sort(() => Math.random() - 0.5);
+  const choices = [correctKey, wrongKeys[0], wrongKeys[1]].sort(() => Math.random() - 0.5);
+
+  quizState.target = {
+    root: root,
+    correctKey: correctKey,
+    scaleNotes: theoreticalScale(root, correctDef.intervals)
+  };
+
+  quizState.options = choices.map(k => ({
+    key: k,
+    label: `${pitchName(root)} ${SCALE_DEFS[k].label}`
+  }));
+
+  $("quiz-target").textContent = `Di che scala si tratta?`;
+
+  const optContainer = $("quiz-options-container");
+  optContainer.style.display = "grid";
+  optContainer.innerHTML = "";
+  quizState.options.forEach(opt => {
+    const btn = document.createElement("button");
+    btn.className = "quiz-opt-btn";
+    btn.textContent = opt.label;
+    btn.onclick = () => {
+      if(quizState.answeredCurrent) return;
+      quizState.selectedOption = opt.key;
+      [...optContainer.children].forEach(c => c.style.outline = "");
+      btn.style.outline = "3px solid var(--accent)";
+    };
+    optContainer.appendChild(btn);
+  });
+}
+
+function renderQuizBoard(){
+  const tuning = TUNINGS[state.tuning];
+  const board = $("quiz-board");
+  if(!board) return;
+
+  if(!quizState.type){
+    renderBox(board, 0, tuning, [], [], false);
     return;
   }
 
-  /* Il quiz chiede di trovare la tonica: il manico parte vuoto, nessuna nota visibile. */
-  renderBox($("quiz-board"),q.base,tuning,[],[],false);
+  if(quizState.type === 'find-note' || quizState.type === 'chord-notes'){
+    renderBox(board, 0, tuning, [], [], false);
 
-  const board=$("quiz-board");
-  const cells=board.querySelectorAll(".fret-cell");
+    const cells = board.querySelectorAll(".fret-cell");
+    cells.forEach(cell => {
+      const stringIdx = Number(cell.dataset.stringIndex);
+      const fret = Number(cell.dataset.fret);
+      if(Number.isNaN(stringIdx) || Number.isNaN(fret)) return;
 
-  cells.forEach(cell=>{
-    const children=[...cell.children];
-    const line=children.find(x=>x.classList.contains("string-line"));
-    if(!line) return;
+      const p = normalizePitch(tuning[stringIdx] + fret);
 
-    /* Ricaviamo corda/tasto dalla struttura del board. */
-    const stringLabel=cell.parentElement.querySelector(".string-label");
-    const rowIndex=Number(cell.dataset.stringIndex);
-    const fretIndex=Number(cell.dataset.fret);
-
-    if(Number.isNaN(rowIndex) || Number.isNaN(fretIndex)) return;
-
-    const pitch=normalizePitch(tuning[rowIndex]+fretIndex);
-    const isTarget=pitch===q.root;
-
-    cell.style.cursor="pointer";
-
-    cell.addEventListener("click",()=>{
-      if(state.quiz.answeredCurrent) return;
-
-      state.quiz.selected={rowIndex,fretIndex,pitch,isTarget};
-      cells.forEach(c=>c.style.outline="");
-      cell.style.outline="3px solid var(--accent)";
-
-      if(isTarget){
-        state.quiz.correct++;
-        state.quiz.answered++;
-        state.quiz.answeredCurrent=true;
-        $("quiz-target").textContent=`✓ Corretto — ${pitchName(q.root)} è la tonica`;
-        updateQuizStats();
-      }else{
-        state.quiz.answered++;
-        state.quiz.answeredCurrent=true;
-        $("quiz-target").textContent=`✗ Non è la tonica — la tonica corretta è ora evidenziata`;
-        updateQuizStats();
+      if(quizState.userPitches.has(p)){
+        const dot = document.createElement("div");
+        dot.className = "note-dot note-scale";
+        dot.textContent = pitchName(p);
+        cell.appendChild(dot);
       }
-      renderQuiz();
-    });
-  });
 
-  if(state.quiz.revealed||state.quiz.answeredCurrent){
-    cells.forEach(cell=>{
-      const rowIndex=Number(cell.dataset.stringIndex);
-      const fretIndex=Number(cell.dataset.fret);
-      if(!Number.isNaN(rowIndex) && !Number.isNaN(fretIndex)){
-        const pitch=normalizePitch(tuning[rowIndex]+fretIndex);
-        if(pitch===q.root){
-          cell.style.outline="3px solid var(--root)";
-          const dot=document.createElement("div");
-          dot.className="note-dot note-root";
-          dot.textContent=pitchName(q.root);
-          cell.appendChild(dot);
+      cell.style.cursor = "pointer";
+      cell.onclick = () => {
+        if(quizState.answeredCurrent) return;
+        if(quizState.type === 'find-note'){
+          quizState.userPitches.clear();
+          quizState.userPitches.add(p);
+        } else {
+          if(quizState.userPitches.has(p)) quizState.userPitches.delete(p);
+          else quizState.userPitches.add(p);
         }
-      }
+        renderQuizBoard();
+      };
     });
+
+  } else if(quizState.type === 'identify-scale'){
+    renderBox(board, 0, tuning, quizState.target.scaleNotes, [], false);
   }
-}
-/* =========================================================
-   QUIZ
-   ========================================================= */
-
-function newQuiz(){
-  const roots=Array.from({length:12},(_,i)=>i);
-  const forms=["C","A","G","E","D"];
-  const root=roots[Math.floor(Math.random()*roots.length)];
-  const form=forms[Math.floor(Math.random()*forms.length)];
-  const intervals=[0,2,4,5,7,9,11];
-
-  state.quiz.target={
-    root,form,intervals,
-    base:findBaseFret(form,root,TUNINGS[state.tuning])
-  };
-
-  state.quiz.total++;
-  state.quiz.answeredCurrent=false;
-  state.quiz.revealed=false;
-  state.quiz.selected=null;
-
-  $("quiz-target").textContent=
-    `Trova la TONICA di ${pitchName(root)} maggiore · Forma ${form}`;
-
-  updateQuizStats();
-  renderQuiz();
 }
 
 function showQuizAnswer(){
-  if(!state.quiz.target || state.quiz.revealed) return;
+  if(!quizState.type || quizState.answeredCurrent) return;
 
-  state.quiz.revealed=true;
+  quizState.answeredCurrent = true;
+  quizState.answered++;
 
-  /*
-    Mostrare la risposta NON modifica né risposte né corrette.
-    Una nuova sfida azzera soltanto lo stato della singola sfida.
-  */
-  if(!state.quiz.answeredCurrent){
-    $("quiz-target").textContent=
-      `Soluzione: la tonica ${pitchName(state.quiz.target.root)} è evidenziata sul manico`;
+  let isCorrect = false;
+
+  if(quizState.type === 'find-note'){
+    if(quizState.userPitches.has(quizState.target.pitch)){
+      isCorrect = true;
+      $("quiz-target").textContent = `✓ Corretto! Hai trovato la nota ${quizState.target.name}`;
+    } else {
+      $("quiz-target").textContent = `✗ Errato! La nota era ${quizState.target.name}`;
+    }
+
+    quizState.userPitches.add(quizState.target.pitch);
+    renderQuizBoard();
+
+  } else if(quizState.type === 'chord-notes'){
+    const required = new Set([quizState.target.root, quizState.target.third, quizState.target.fifth]);
+    let hasAllRequired = true;
+
+    required.forEach(p => {
+      if(!quizState.userPitches.has(p)) hasAllRequired = false;
+    });
+
+    let hasInvalidNotes = false;
+    quizState.userPitches.forEach(p => {
+      if(!required.has(p)) hasInvalidNotes = true;
+    });
+
+    if(hasAllRequired && !hasInvalidNotes){
+      isCorrect = true;
+      $("quiz-target").textContent = `✓ Corretto! Hai inserito tutte le note di ${quizState.target.name}`;
+    } else {
+      const correctNames = `${pitchName(quizState.target.root)}, ${pitchName(quizState.target.third)}, ${pitchName(quizState.target.fifth)}`;
+      $("quiz-target").textContent = `✗ Errato! Le note corrette sono: ${correctNames}`;
+    }
+
+    quizState.userPitches = required;
+    renderQuizBoard();
+
+  } else if(quizState.type === 'identify-scale'){
+    if(quizState.selectedOption === quizState.target.correctKey){
+      isCorrect = true;
+      $("quiz-target").textContent = `✓ Corretto! È la scala di ${pitchName(quizState.target.root)} ${SCALE_DEFS[quizState.target.correctKey].label}`;
+    } else {
+      $("quiz-target").textContent = `✗ Errato! La risposta corretta era ${pitchName(quizState.target.root)} ${SCALE_DEFS[quizState.target.correctKey].label}`;
+    }
   }
 
-  renderQuiz();
+  if(isCorrect) quizState.correct++;
+  updateQuizStats();
 }
 
 function updateQuizStats(){
-  $("quiz-total").textContent=state.quiz.total;
-  $("quiz-answered").textContent=state.quiz.answered;
-  $("quiz-correct").textContent=state.quiz.correct;
-
-  $("quiz-rate").textContent=state.quiz.answered
-    ? Math.round((state.quiz.correct/state.quiz.answered)*100)+"%"
+  $("quiz-total").textContent = quizState.total;
+  $("quiz-answered").textContent = quizState.answered;
+  $("quiz-correct").textContent = quizState.correct;
+  $("quiz-rate").textContent = quizState.answered
+    ? Math.round((quizState.correct / quizState.answered) * 100) + "%"
     : "—";
 }
+
+// function newQuizFindNote(){ ... }
+// function newQuizChordNotes(){ ... }
+// function newQuizFindScale(){ ... }
+// function renderQuiz(){ ... }
+
 /* =========================================================
    EVENTI
    ========================================================= */
@@ -1449,9 +1055,8 @@ $("category-select").addEventListener("change",e=>{
   state.item="";
   populateCategoryItems();
   state.item=$("item-select").value;
-  populateChordQuality();
+  // populateChordQuality();
   
-  // Auto-switch triade: minor ↔ major
   if(state.category==="scale"){
     if(state.item==="minor" || state.item==="pentatonic_minor"){
       if(state.chordType==="maj") state.chordType="min";
@@ -1459,17 +1064,11 @@ $("category-select").addEventListener("change",e=>{
       if(state.chordType==="min") state.chordType="maj";
     }
   }
-  
   renderAll();
 });
 
 $("item-select").addEventListener("change",e=>{
   state.item=e.target.value;
-  renderAll();
-});
-
-$("caged-select").addEventListener("change",e=>{
-  state.caged=e.target.value;
   renderAll();
 });
 
@@ -1480,40 +1079,8 @@ $("chord-select").addEventListener("change",e=>{
   renderAll();
 });
 
-$("chord-quality-select").addEventListener("change",e=>{
-  state.chordType=e.target.value;
-  renderAll();
-});
-
 $("display-select").addEventListener("change",e=>{
   state.display=e.target.value;
-  renderAll();
-});
-
-$("btn-rootOnly").addEventListener("click",()=>{
-  state.rootOnly=!state.rootOnly;
-  $("btn-rootOnly").classList.toggle("active",state.rootOnly);
-  renderAll();
-});
-
-$("btn-blueNote").addEventListener("click",()=>{
-  state.blueNote=!state.blueNote;
-  $("btn-blueNote").classList.toggle("active",state.blueNote);
-  renderAll();
-});
-
-$("chord-root-2").addEventListener("change",e=>{
-  state.root=+e.target.value;
-  renderAll();
-});
-
-$("chord-type-2").addEventListener("change",e=>{
-  state.chordType=e.target.value;
-  renderAll();
-});
-
-$("chord-form-2").addEventListener("change",e=>{
-  state.caged=e.target.value;
   renderAll();
 });
 
@@ -1548,7 +1115,7 @@ $("btn-theme").addEventListener("click",()=>{
    SALVATAGGIO IMPOSTAZIONI
    ========================================================= */
 const STORE_KEY="cagedTrainerSettings";
-const SAVED_KEYS=["root","category","item","caged","chordType","selectedChordOffset","naming","accidental","tuning","neckLength","rootOnly","blueNote","display"];
+const SAVED_KEYS=["root","category","item","caged","chordType","selectedChordOffset","naming","accidental","tuning","neckLength","display"];
 const SETTING_OK={
   root:v=>Number.isInteger(v)&&v>=0&&v<12,
   category:v=>["scale","mode","arpeggio"].includes(v),
@@ -1560,8 +1127,6 @@ const SETTING_OK={
   accidental:v=>["auto","sharp","flat"].includes(v),
   tuning:v=>typeof v==="string"&&v in TUNINGS,
   neckLength:v=>[12,18,19,20,21,22,24].includes(v),
-  rootOnly:v=>typeof v==="boolean",
-  blueNote:v=>typeof v==="boolean",
   display:v=>["notes","degrees","intervals"].includes(v)
 };
 
@@ -1591,14 +1156,12 @@ function loadSettings(){
 function syncControls(){
   $("category-select").value=state.category;
   populateCategoryItems();
-  $("caged-select").value=state.caged;
   $("display-select").value=state.display;
   $("naming-select").value=state.naming;
   $("accidental-select").value=state.accidental;
   $("neck-length-select").value=String(state.neckLength);
   $("tuning-select").value=state.tuning;
-  $("btn-rootOnly").classList.toggle("active",state.rootOnly);
-  $("btn-blueNote").classList.toggle("active",state.blueNote);
+  renderCAGEDSchemas();
 }
 
 $("btn-reset").addEventListener("click",()=>{
@@ -1675,7 +1238,6 @@ function metroAnim(){
   let cur=null;
   while(metro.queue.length&&metro.queue[0].t<=now) cur=metro.queue.shift();
   if(cur) {
-    // Spegni tutti i pallini e accendi solo quello corrente
     [...$("metro-beats").children].forEach((d,i)=>{
       d.classList.remove("on");
       if(i===cur.b) d.classList.add("on");
@@ -1772,6 +1334,8 @@ function updateMetroUI(){
 $("new-quiz").addEventListener("click",newQuiz);
 $("show-answer").addEventListener("click",showQuizAnswer);
 
+// $("quiz-type-select")?.addEventListener("change", () => { ... });
+
 /* =========================================================
    AVVIO + PERSISTENZA
    ========================================================= */
@@ -1791,7 +1355,6 @@ $("metro-sound").value=metro.settings.sound;
 buildMetroBeats();
 renderAll();
 
-/* Service Worker PWA */
 if("serviceWorker" in navigator &&
    (location.protocol==="https:"||location.protocol==="http:")){
   window.addEventListener("load",()=>{
